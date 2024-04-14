@@ -1,0 +1,141 @@
+<ngx-spinner bdColor = "rgba(0, 0, 0, 0.1)" size = "large" color = "#009688" type = "square-jelly-box" [fullScreen] = "true"><p style="color: white" > Ładowanie </p></ngx-spinner>
+
+<div class="page-container">
+  <mat-card class="large-card-size">
+    <mat-card-header>
+      <div class="center-item row-item">
+        <h2 class="title">Dokumenty</h2>
+      </div>
+
+    </mat-card-header>
+    <mat-card-content>
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Dokumenty publiczne
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Mapa
+              </mat-panel-title>
+              <mat-panel-description class="description">
+                Tutaj dodaj mape ogrodu
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div *ngIf="isMapAvailable">
+              <a (click)="downloadMap()" target="_blank" class="showClick">Twoja mapa</a>
+            </div>
+
+            <div class="left-button">
+              <app-text-button class="add-button" [text]="'Dodaj dokument'" [color]="'accent'"
+                               (click)="toggleAddMapDocumentForm()"></app-text-button>
+            </div>
+
+            <div *ngIf="showAddMapDocumentForm">
+              <input type="file" (change)="onMapFileSelected($event)">
+              <div class="left-button">
+                <app-text-button class="add-button" [text]="'Dodaj'" [color]="'accent'"
+                                 (click)="addMapDocument()"></app-text-button>
+              </div>
+            </div>
+          </mat-expansion-panel>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Regulamin
+              </mat-panel-title>
+              <mat-panel-description class="description">
+                Tutaj dodaj regulamin ogrodu
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div *ngIf="isStatuteAvailable">
+              <a (click)="downloadStatute()" target="_blank" class="showClick">Twój regulamin</a>
+            </div>
+            <div class="left-button">
+              <app-text-button class="add-button" [text]="'Dodaj dokument'" [color]="'accent'"
+                               (click)="toggleAddStatuteDocumentForm()"></app-text-button>
+            </div>
+
+            <div *ngIf="showAddStatuteDocumentForm">
+              <input type="file" (change)="onStatuteFileSelected($event)">
+              <div class="left-button">
+                <app-text-button class="add-button" [text]="'Dodaj'" [color]="'accent'"
+                                 (click)="addStatuteDocument()"></app-text-button>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Dokumenty prywatne
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div>
+            <app-folder-list [parent]="null" [level]="1" [documents]="documents" (itemAdded)="onItemAdded()"></app-folder-list>
+            <div>
+              <div>
+                <div class="left-button">
+                  <div>
+                    <app-text-button class="add-button" [text]="'Dodaj dokument'" [color]="'accent'"
+                                     (click)="toggleAddDocumentForm()"></app-text-button>
+                  </div>
+                </div>
+
+                <div *ngIf="showAddDocumentForm">
+                  <form class [formGroup]="addFileForm">
+                    <mat-form-field class="row-item">
+                      <mat-label>Nazwa</mat-label>
+                      <input matInput type="string" placeholder="Nazwa" formControlName="name">
+                      <mat-error *ngFor="let error of validationErrors('name',addFileForm)">
+                        {{ error.message }}
+                      </mat-error>
+                    </mat-form-field>
+                    <div class="row-item">
+                      <input type="file" (change)="onFileSelected($event)" type="file" formControlName="file">
+                      <mat-error *ngFor="let error of validationErrors('file',addFileForm)">
+                        {{ error.message }}
+                      </mat-error>
+                    </div>
+                    <div class="left-button">
+                      <app-text-button type="submit" class="add-button" [text]="'Dodaj'" [color]="'primary'"
+                                       (click)="addNewDocument()"></app-text-button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div>
+                <div class="left-button">
+                  <div>
+                    <app-text-button class="add-button" [text]="'Dodaj Folder'" [color]="'accent'"
+                                     (click)="toggleAddListForm()"></app-text-button>
+                  </div>
+                </div>
+
+                <div *ngIf="showAddListForm">
+                  <form class [formGroup]="addListForm">
+                    <mat-form-field class="row-item">
+                      <mat-label>Nazwa</mat-label>
+                      <input matInput type="string" placeholder="Nazwa" formControlName="name">
+                      <mat-error *ngFor="let error of validationErrors('name',addListForm)">
+                        {{ error.message }}
+                      </mat-error>
+                    </mat-form-field>
+                    <div class="left-button">
+                      <app-text-button type="submit" class="add-button" [text]="'Dodaj'" [color]="'primary'"
+                                       (click)="addNewList()"></app-text-button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card-content>
+  </mat-card>
+</div>

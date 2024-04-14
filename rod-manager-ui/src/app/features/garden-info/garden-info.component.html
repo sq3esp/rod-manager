@@ -1,0 +1,79 @@
+<ngx-spinner bdColor = "rgba(0, 0, 0, 0.3)" size = "large" color = "#009688" type = "square-jelly-box" [fullScreen] = "true"><p style="color: white" > Ładowanie </p></ngx-spinner>
+<div class="page-container" >
+  <mat-card class="large-card-size"style="z-index: 10">
+    <mat-card-header>
+      <div class="center-item">
+        <h2 class="title">O ogrodzie</h2>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="page-container">
+        <mat-card class="description-card-size">
+          <mat-card-content>
+            <p class="description">{{description}}</p>
+            <button  mat-fab color="primary" aria-label="Edytuj" class="editButton" (click)="openDialog()" *appHasRole="[Role.MANAGER, Role.ADMIN]">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="page-container" *ngIf="isMapAvailable||isStatuteAvailable">
+        <mat-card class="inter-card-size">
+          <mat-card-header>
+            <div class="center-item column">
+              <div *ngIf="isMapAvailable">
+                <a mat-button (click)="downloadMap()" color="primary" target="_blank" class="document">Mapa</a>
+              </div>
+              <div *ngIf="isStatuteAvailable">
+                <a mat-button (click)="downloadStatue()" color="primary" target="_blank" class="document">Regulamin</a>
+              </div>
+            </div>
+          </mat-card-header>
+        </mat-card>
+      </div>
+
+      <div class="page-container">
+        <mat-card class="employers-card-size">
+          <mat-card-content>
+            <mat-card-header>
+              <div class="center-item column title-managment">
+                Zarząd
+              </div>
+            </mat-card-header>
+            <mat-grid-list [cols]="isMobile ? 1 : 2" rowHeight="2:1">
+              <ng-container *ngFor="let employer of employers">
+                <mat-grid-tile>
+                  <app-person-card-garden class="full-width"
+                                          [position]="employer.position"
+                                          [name]="employer.name"
+                                          [phoneNumber]="employer.phoneNumber"
+                                          [email]="employer.email"
+                  ></app-person-card-garden>
+                </mat-grid-tile>
+              </ng-container>
+            </mat-grid-list>
+            <button  mat-fab color="primary" aria-label="Edytuj" class="editButton" (click)="openWorkersList()" *appHasRole="[Role.MANAGER, Role.ADMIN]">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+
+
+
+
+
+<!--<div style="position: relative; bottom: 50px; right: 20px; z-index: 1;">-->
+<!--  <img src="assets/tlo2.png" alt="Tło 2" width="200px" class="test">-->
+<!--</div>-->
+
+<!--<button mat-fab color="primary" class="floating-button" *appHasRole="[Role.MANAGER, Role.ADMIN]"-->
+<!--        (click)="openWorkersList()">-->
+<!--  <mat-icon>edit</mat-icon>-->
+<!--</button>-->
+

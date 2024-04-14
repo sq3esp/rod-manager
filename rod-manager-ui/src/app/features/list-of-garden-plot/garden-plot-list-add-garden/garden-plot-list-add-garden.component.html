@@ -1,0 +1,94 @@
+<mat-card class="details-card">
+  <mat-card-header>
+    <div class="center-item">
+      <h2 class="title">Dodaj Działkę</h2>
+    </div>
+    <button mat-icon-button class="close-button" (click)="closeAddingGardenPlot()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-card class="form-card">
+      <mat-card-content>
+        <form class [formGroup]="addGardenForm">
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <mat-label>Sektor</mat-label>
+              <input matInput type="text" placeholder="Sektor" formControlName="sector" [matAutocomplete]="auto">
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of sectorsOptions" [value]="option">
+                  {{ option}}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngFor="let error of validationErrors('sector')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <mat-label>Aleja</mat-label>
+              <input matInput type="text" placeholder="Aleja" formControlName="avenue"
+                     [matAutocomplete]="auto2">
+              <mat-autocomplete #auto2="matAutocomplete">
+                <mat-option *ngFor="let option of avenuesOptions" [value]="option">
+                  {{ option}}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngFor="let error of validationErrors('avenue')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <mat-label>Numer</mat-label>
+              <input matInput type="number" placeholder="Numer" formControlName="number">
+              <mat-error *ngFor="let error of validationErrors('number')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <mat-label>Powierzchnia m²</mat-label>
+              <input matInput type="number" placeholder="Powierzchnia m²" formControlName="area">
+              <mat-error *ngFor="let error of validationErrors('area')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <mat-label>Dzierżwca</mat-label>
+              <input matInput placeholder="Dzierżawca" formControlName="leaseholderEmail" [matAutocomplete]="auto3">
+              <mat-autocomplete #auto3="matAutocomplete">
+                <mat-option *ngFor="let option of leaseHolderOptions" [value]="option.email">
+                  {{ option.fullName }} (Email: {{ option.email }})
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngFor="let error of validationErrors('leaseholderEmail')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option *ngFor="let status of Object.values(PlotStatus)" [value]="status">{{ status }}</mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of validationErrors('status')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="center-button">
+            <app-text-button type="submit" class="add-button" [text]="'Dodaj działkę'" [color]="'accent'"
+                             (click)="addNewGardenPlot()"></app-text-button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </mat-card-content>
+</mat-card>

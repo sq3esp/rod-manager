@@ -1,0 +1,147 @@
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+@import 'node_modules/quill/dist/quill.bubble.css';
+@import "assets/theme.scss";
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+
+
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$rod-manager-ui-theme: mat.define-light-theme((
+  color: (
+    primary: $rod-manager-ui-primary,
+    accent: $rod-manager-ui-accent,
+    warn: $rod-manager-ui-warn,
+  )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($rod-manager-ui-theme);
+
+/* You can add global styles to this file, and also import other style files */
+
+
+/* TODO(mdc-migration): The following rule targets internal classes of menu that may no longer apply for the MDC version.*/
+.mat-menu-custom-style {
+  --mat-menu-container-color: black;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif;
+  }
+img {
+  max-width: 100%; height: auto
+}
+
+.cal-month-view .custom-event {
+  width: 100%;
+  height: auto;
+  border-radius: 20%;
+  display: inline-block;
+  margin: 5px;
+}
+
+.custom-event {
+  .mat-mdc-button.mat-mdc-button-base, .mat-mdc-raised-button.mat-mdc-button-base, .mat-mdc-unelevated-button.mat-mdc-button-base, .mat-mdc-outlined-button.mat-mdc-button-bas {
+    height: 1.2rem;
+    //width: 100%;
+  }
+}
+
+.ngx-toastr .toast {
+  border-radius: 8px;
+  padding: 20px;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Success - Green */
+.toast-success {
+  background-color: #28a745; /* Green */
+  color: white;
+  border-left: 5px solid #218838; /* Darker green */
+}
+
+/* Error - Red */
+.toast-error {
+  background-color: #dc3545; /* Red */
+  color: white;
+  border-left: 5px solid #c82333; /* Darker red */
+}
+
+/* Close button customization */
+.toast .close-button {
+  color: white;
+  font-size: 20px;
+}
+
+
+
+/* Importing Bootstrap SCSS file. */
+@import "node_modules/bootstrap/scss/bootstrap";
+
+/* Importing Datepicker SCSS file. */
+@import "node_modules/ngx-bootstrap/datepicker/bs-datepicker";
+
+:root{
+  --main-font: 1rem;
+  --10-font: 10px;
+  --11-font: 11px;
+  --12-font: 12px;
+  --13-font: 13px;
+  --14-font: 14px;
+  --16-font: 16px;
+  --17-font: 17px;
+  --18-font: 18px;
+  --20-font: 20px;
+  --22-font: 22px;
+  --25-font: 25px;
+  --30-font: 30px;
+  --32-font: 32px;
+  --36-font: 36px;
+  --h2-font: 1.8em;
+  --h6-font: 0.9em;
+
+
+}
+
+body{
+  font-size: var(--main-font);
+}
+
+.mainTable th, .mainTable td {
+  font-size: var(--16-font);
+}
+
+h2{
+  font-size: var(--h2-font);
+}
+h6{
+  font-size: var(--h6-font);
+}
+
+mat-label{
+  font-size: var(--main-font);
+}
+
+input{
+  font-size: var(--main-font);
+}
+
+
+
+
+
+

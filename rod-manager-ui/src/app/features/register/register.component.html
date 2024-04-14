@@ -1,0 +1,91 @@
+<div class="page-container">
+  <mat-card appearance="outlined" class="large-card large-card-size row-container">
+    <mat-card-header class="row-item">
+      <div class="row-item">
+        <h2 class="title">Rejestracja</h2>
+      </div>
+    </mat-card-header>
+    <mat-card-content class="row-item card-content-spacing">
+      <form class="form-container" [formGroup]="registerFrom">
+        <div class="row-container">
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <input matInput formControlName="firstName" placeholder="Imię" required>
+              <mat-label>Imię</mat-label>
+              <mat-error *ngFor="let error of validationErrors('firstName')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <input matInput formControlName="lastName" placeholder="Nazwisko" required>
+              <mat-label>Nazwisko</mat-label>
+              <mat-error *ngFor="let error of validationErrors('lastName')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <input matInput type="email" formControlName="email" placeholder="Email" required>
+              <mat-label>Email</mat-label>
+              <mat-error *ngFor="let error of validationErrors('email')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-container row-item ">
+            <mat-form-field class="country-code">
+
+              <mat-select formControlName="countryCode">
+                <mat-option *ngFor="let country of getCountriesWithCodesSortedByCallingCode()" [value]="country">
+                  +{{ getCountryCallingCode(country) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="col-item">
+              <mat-label>Numer telefonu</mat-label>
+              <input matInput type="tel" formControlName="phoneNumber" placeholder="Numer telefonu"
+                     (input)="formatPhoneNumber($event)">
+              <mat-error *ngFor="let error of validationErrors('phoneNumber')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <input matInput type="password" formControlName="password" placeholder="Hasło" required>
+              <mat-error *ngFor="let error of validationErrors('password')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <input matInput type="password" formControlName="confirmPassword" placeholder="Powtórz hasło" required>
+              <mat-error *ngFor="let error of validationErrors('confirmPassword')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="row-item register-section">
+            <button mat-raised-button class="register-button" color="primary" type="submit" (click)="register()">
+              Zarejestruj
+            </button>
+          </div>
+          <div class="row-item register-section">
+            <mat-divider></mat-divider>
+            <span class="or-label">lub</span>
+          </div>
+          <div class="row-item register-section">
+            <asl-google-signin-button type="standard" width="300" size="large"
+                                      text="signup_with"></asl-google-signin-button>
+          </div>
+        </div>
+      </form>
+
+    </mat-card-content>
+  </mat-card>
+</div>

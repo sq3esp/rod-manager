@@ -1,0 +1,156 @@
+<div class="page-container">
+  <mat-card *ngIf="gardenPlot" class="details-card">
+    <mat-card-header>
+      <div class="center-item">
+        <h2
+          class="title">{{ showPaymentHistory ? 'Historia płatności' : (showEditGardenPlotForm ? 'Edytuj działkę' : 'Dane działki') }}</h2>
+      </div>
+      <button mat-icon-button class="close-button" (click)="closeEditingingGardenPlot()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <div [ngSwitch]="true">
+      <div *ngSwitchDefault>
+        <mat-card-content>
+          <mat-card class="tabel-card">
+            <mat-card-content>
+              <table class="property-table">
+                <tr>
+                  <td>Dzierżawca</td>
+                  <td>{{ leaseholder?.first_name }} {{ leaseholder?.last_name }}</td>
+                </tr>
+                <tr>
+                  <td>Email</td>
+                  <td>{{ leaseholder?.email }}</td>
+                </tr>
+                <tr>
+                  <td>Były dzierżawca</td>
+                  <td>{{ exleaseholder?.first_name }} {{ exleaseholder?.last_name }}</td>
+                </tr>
+                <tr>
+                  <td>Email byłego dzierżawcy</td>
+                  <td>{{ exleaseholder?.email }}</td>
+                </tr>
+                <tr>
+                  <td>Numer telefonu</td>
+                  <td>{{ leaseholder?.phone | phoneNumber}}</td>
+                </tr>
+                <tr>
+                  <td>Sektor</td>
+                  <td>{{ gardenPlot.sector }}</td>
+                </tr>
+                <tr>
+                  <td>Aleja</td>
+                  <td>{{ gardenPlot.avenue }}</td>
+                </tr>
+                <tr>
+                  <td>Numer</td>
+                  <td>{{ gardenPlot.number }}</td>
+                </tr>
+                <tr>
+                  <td>Powierzchnia</td>
+                  <td>{{ gardenPlot.area + ' m²'}}</td>
+                </tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="tabel-card">
+            <mat-card-content>
+              <table class="payment-table">
+                <tr>
+                  <td>Kwota do zapłaty</td>
+                  <td *ngIf="leaseholder">{{((-1)* leaseholder.balance) + ' zł' }}</td>
+                  <td *ngIf="!leaseholder">{{ '' }}</td>
+                </tr>
+<!--                <tr>-->
+<!--                  <td>Termin płatności</td>-->
+<!--                  <td>{{ leaseholder?.paymentDueDate | date:'dd.MM.yyyy'}}</td>-->
+<!--                </tr>-->
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+          <div class="center-button">
+            <app-text-button class="add-button" [text]="'Historia płatności'" [color]="'accent'"
+                             (click)="showPaymentHistory = true" *ngIf="leaseholder"></app-text-button>
+          </div>
+
+        </mat-card-content>
+      </div>
+      <div *ngSwitchCase="showPaymentHistory">
+        <div *ngIf="!showNewPaymentForm;">
+          <mat-card class="tabel-card">
+            <mat-card-content>
+              <app-garden-plot-details-payment-history
+                [userId]="leaseholder.id"
+                class="payment-history">
+              </app-garden-plot-details-payment-history>
+            </mat-card-content>
+          </mat-card>
+          <div class="center-button">
+            <app-text-button [text]="'Wprowadź nową płatność'" [color]="'accent'"
+                             (click)="showNewPaymentForm=true"></app-text-button>
+          </div>
+        </div>
+        <div *ngIf="showNewPaymentForm">
+          <mat-card>
+            <mat-card-content>
+              <form class="form-container" [formGroup]="paymentForm">
+                <div class="row-container">
+                  <div class="row-item">
+                    <mat-form-field class="full-width">
+                      <mat-label>Kwota</mat-label>
+                      <input matInput type="number" placeholder="Kwota" formControlName="amount">
+                      <mat-hint style="white-space: pre-line;">Wprowadź liczbę, np. 123.45</mat-hint>
+                      <mat-error *ngFor="let error of validationErrors('amount')">{{ error.message }}</mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="full-width">
+                      <mat-label>Rodzaj</mat-label>
+                      <mat-select formControlName="type">
+                        <mat-option *ngFor="let option of yourEnumOptions" [value]="option.value">{{ option.label }}</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="full-width">
+                      <mat-label>Data</mat-label>
+                      <input matInput [matDatepicker]="picker" placeholder="Data" formControlName="date" required>
+                      <mat-hint>DD.MM.YYYY</mat-hint>
+                      <mat-error *ngFor="let error of validationErrors('date')">
+                        {{ error.message }}
+                      </mat-error>
+                      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                      <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field class="full-width">
+                      <mat-label>Opis</mat-label>
+                      <input matInput type="text" placeholder="Opis" formControlName="description">
+                      <mat-error *ngFor="let error of validationErrors('description')">
+                        {{ error.message }}
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="center-button">
+                  <app-text-button type="submit" class="add-button" [text]="'Dodaj płatność'" [color]="'accent'"
+                                   (click)="addNewPayment()"></app-text-button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+      <div *ngSwitchCase="showEditGardenPlotForm">
+        <app-garden-plot-edit-garden
+          [gardenPlot]="gardenPlot"
+          (closeEditingingGardenPlot)="closeEditingingGardenPlot()">
+        </app-garden-plot-edit-garden>
+      </div>
+    </div>
+  </mat-card>
+</div>
+
+<button mat-fab color="primary" class="floating-button" *ngIf="!showPaymentHistory&&!showEditGardenPlotForm"
+        (click)="showEditGardenPlotForm=true">
+  <mat-icon>edit</mat-icon>
+</button>

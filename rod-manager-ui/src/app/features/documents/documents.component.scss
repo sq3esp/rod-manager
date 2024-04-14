@@ -1,0 +1,58 @@
+.add-button {
+}
+.left-button {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-top: 7px;
+  margin-bottom: 7px;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.large-card-size {
+  width: 70%;
+  align-self: center;
+  -webkit-box-shadow: 0px 3px 15px -1px rgba(66, 68, 90, 1);
+  -moz-box-shadow: 0px 3px 15px -1px rgba(66, 68, 90, 1);
+  box-shadow: 0px 3px 15px -1px rgba(66, 68, 90, 1);
+  align-content: center;
+  margin-top: 5%;
+  margin-bottom: 5%;
+  padding-left: 2%;
+  padding-right: 2%;
+  padding-bottom: 30px;
+}
+
+.title {
+  text-align: center;
+}
+
+.center-item {
+  flex: 1;
+  width: 80%;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+a:hover {
+  cursor: pointer;
+}
+
+.row-item{
+  flex: 1;
+}
+
+@media only screen and (max-width: 1300px) {
+  .large-card-size {
+    width: 95%;
+  }
+  .description {
+    display: none;
+  }
+}

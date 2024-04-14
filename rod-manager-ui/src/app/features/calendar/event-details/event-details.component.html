@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Powiązane ogłoszenie</h1>
+<div mat-dialog-content>
+  <ng-template #loading>
+    <mat-spinner></mat-spinner>
+  </ng-template>
+  <div *ngIf="post$ | async; else loading; let post" class="post-container">
+    <app-post [post]="post"></app-post>
+  </div>
+</div>
+

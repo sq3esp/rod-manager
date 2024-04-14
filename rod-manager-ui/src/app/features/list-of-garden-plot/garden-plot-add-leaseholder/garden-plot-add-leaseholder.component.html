@@ -1,0 +1,39 @@
+<mat-card *ngIf="gardenPlot" class="details-card">
+  <mat-card-header>
+    <div class="center-item">
+      <h2 class="title">Dodaj Dzierżawce</h2>
+    </div>
+    <button mat-icon-button class="close-button" (click)="closeAddingLeaseHolder()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-card class="form-card">
+      <mat-card-content>
+        <form [formGroup]="addLeaseHolderForm">
+          <mat-form-field class="full-width">
+            <mat-label>Imię i nazwisko dzierżawcy</mat-label>
+            <ng-container>
+              <input matInput placeholder="Imię i nazwisko dzierżawcy" formControlName="leaseholderEmail" [matAutocomplete]="auto">
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of leaseHolderOptions" [value]="option.email">
+                  {{ option.fullName }} (Email: {{ option.email }})
+                </mat-option>
+              </mat-autocomplete>
+            </ng-container>
+            <mat-error *ngFor="let error of validationErrors('leaseholderEmail')">
+              {{ error.message }}
+            </mat-error>
+          </mat-form-field>
+          <div class="center-button">
+            <app-text-button type="submit" class="add-button" [text]="'Akceptuj'" [color]="'accent'"
+                             (click)="accept()"></app-text-button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </mat-card-content>
+</mat-card>
+
+
