@@ -1,0 +1,31 @@
+<div class="page-container">
+  <mat-card class="details-card row-container">
+    <mat-card-header class="row-item">
+      <div class="row-item">
+        <h2 class="title">Podaj kod z wiadomości email</h2>
+      </div>
+    </mat-card-header>
+    <mat-card-content class="row-item card-content-spacing">
+      <form class="form-container" [formGroup]="resetPasswordFrom">
+        <div class="row-container">
+          <div class="row-item">
+            <mat-form-field class="full-width">
+              <input matInput type="password" formControlName="password" placeholder="kod" required autocomplete="new-password">
+              <mat-label>Kod</mat-label>
+              <mat-error *ngFor="let error of validationErrors('password')">
+                {{ error.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="row-item button-section">
+            <button mat-raised-button class="button" color="primary" type="submit">
+              Zaloguj się
+            </button>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+

@@ -131,6 +131,7 @@ import { UserFolderListComponent } from './features/user-info/user-folder-list/u
 import { PeriodDialogComponent } from './features/payments/period-dialog/period-dialog.component';
 import {MatBadgeModule} from "@angular/material/badge";
 import { TypeNamePipe } from './features/list-of-garden-plot/garden-plot-details/garden-plot-details-payment-history/type-name.pipe';
+import { SecondLoginComponent } from './features/login/second-login/second-login.component';
 
 
 
@@ -239,7 +240,8 @@ registerLocaleData(localePl);
     ComplaintDialogComponent,
     StateNamePipe,
     PeriodDialogComponent,
-    TypeNamePipe
+    TypeNamePipe,
+    SecondLoginComponent
 
   ],
     imports: [

@@ -12,6 +12,8 @@ from rest_framework import permissions
 
 from rodManager.users.google_signin import GoogleTokenLogin
 from rodManager.views.login import CustomLogin
+from .views.adminfile import AdminFileView
+from .views.file import FileView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -54,6 +56,16 @@ urlpatterns = [
         r"^api/protectedfile/(?P<file_path>.+)$",
         ProtectedFileView.as_view(),
         name="protectedfile",
+    ),
+    re_path(
+        r"^api/adminfile/(?P<file_path>.+)$",
+        AdminFileView.as_view(),
+        name="adminfile",
+    ),
+    re_path(
+        r"^api/file/(?P<file_path>.+)$",
+        FileView.as_view(),
+        name="file",
     ),
     path("api/gardens/", include("rodManager.views.gardens.urls")),
     path("api/garden-offers/", include("rodManager.views.gardenoffers.urls")),

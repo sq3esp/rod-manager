@@ -5,6 +5,8 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { NgxSpinnerService } from "ngx-spinner";
 import { ToastrService } from "ngx-toastr";
 import { DocumentsService } from "../documents.service";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {StorageService} from "../../../core/storage/storage.service";
 
 @Component({
   selector: 'app-folder-list',
@@ -32,7 +34,9 @@ export class FolderListComponent
     formBuilder: FormBuilder,
     private documentsService: DocumentsService,
     private spinner: NgxSpinnerService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private tokenStorageService: StorageService,
+    private http: HttpClient
   )
   {
     this.addFileForm = formBuilder.group({
@@ -84,10 +88,41 @@ export class FolderListComponent
     return errors;
   }
 
-  downloadFile(link: string | undefined)
-  {
-    const fullLink = "/api/protectedfile" + link;
-    window.open(fullLink, '_blank');
+  // downloadFile(link: string | undefined)
+  // {
+  //   const fullLink = "/api/adminfile" + link;
+  //   window.open(fullLink, '_blank');
+  // }
+
+
+  downloadFile(link: string | undefined) {
+    const fullLink = "/api/adminfile" + link;
+
+    // Pobranie tokenu z serwisu przechowującego tokeny
+    const token = this.tokenStorageService.getAccessToken();
+
+    // Jeśli token istnieje, dodaj nagłówek z tokenem autoryzacyjnym
+    if (token) {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+
+      // Wysłanie żądania pobrania pliku z uwzględnieniem nagłówka z tokenem
+      this.http.get(fullLink, {
+        headers: headers,
+        responseType: 'blob' // Określenie typu odpowiedzi jako blob (dla plików)
+      }).subscribe((data: Blob) => {
+        // Tworzenie URL obiektu Blob
+        const blob = new Blob([data], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+
+        // Otwarcie nowego okna z adresem URL pliku
+        window.open(url, '_blank');
+
+        // Zwolnienie zasobów URL po zamknięciu okna
+        window.URL.revokeObjectURL(url);
+      });
+    }
   }
 
   addNewDocument(item: Document)
