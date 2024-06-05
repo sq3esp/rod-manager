@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rodManager.dir_models.meter import Meter, MeterLastRecordSerializer
 from rodManager.dir_models.record import (
     Record,
     RecordSerializer,
@@ -75,6 +76,23 @@ class RecordsCRUD(APIView):
             if not request.data.get("datetime"):
                 request.data["datetime"] = datetime.datetime.now()
             serializer = RecordSerializer(data=request.data)
+
+            meter_serial = request.data.get("meter")
+            if not Meter.objects.filter(serial=meter_serial).exists():
+                return Response(
+                    {"error": "Meter with this number does not exist."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            new_value = request.data.get("value")
+            meter = Meter.objects.get(serial=meter_serial)
+            last_value = MeterLastRecordSerializer().get_value(meter)
+            if last_value and new_value < last_value:
+                return Response(
+                    {"error": "New value must be greater than the last recorded value."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

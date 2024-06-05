@@ -15,9 +15,14 @@ from rodManager.libs.rodpagitation import RODPagination
 import drf_spectacular.serializers as drfserializers
 
 
+valid_garden_statuses = ["dostępna", "niedostępna"]
 
 
-class GardensCRUD(APIView):  
+def is_leaseholder_valid(leaseholder_id):
+    return True if Account.objects.filter(id=leaseholder_id).exists() and not Garden.objects.filter(
+        leaseholderID=leaseholder_id).exists() else False
+
+class GardensCRUD(APIView):
     queryset = Garden.objects.all()
     serializer_class = GardenNameSerializer
     pagination_class = RODPagination
@@ -34,7 +39,7 @@ class GardensCRUD(APIView):
             response=GardenNameSerializer(many=True),
         ),
     }
-    
+
     )
     def get(self, request):
         paginator = RODPagination()
@@ -43,7 +48,7 @@ class GardensCRUD(APIView):
             return paginator.get_paginated_response(GardenNameSerializer(gardens, many=True).data)
         else:
             return Response({"error": "You don't have permission to view gardens."}, status=status.HTTP_403_FORBIDDEN)
-    
+
     @extend_schema(
     summary="Create garden",
     request=GardenSerializer,
@@ -63,22 +68,33 @@ class GardensCRUD(APIView):
         if request.user.is_authenticated:
             if not request.data.get("sector") or not request.data.get("avenue") or not request.data.get("number") or not request.data.get("area"):
                 return Response({"error": "Sector, avenue, number, area and status are required."}, status=status.HTTP_400_BAD_REQUEST)
-           
-            
+
+            # Walidacja dotycząca dzierżawcy
+            leaseholder_id = request.data.get("leaseholderID")
+            if not is_leaseholder_valid(leaseholder_id):
+                return Response({"error": "Leaseholder with given ID does not exist or has another garden."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Walidacja czy status jest prawidłowy
+            garden_status = request.data.get("status")
+            if garden_status not in valid_garden_statuses:
+                return Response({"error": "Invalid status value. Please use 'dostępna' or 'niedostępna'."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             if Garden.objects.filter(
                 sector=request.data["sector"],
                 avenue=request.data["avenue"],
                 number=request.data["number"],
             ).exists():
                 return Response({"error": "Garden already exists."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             newgarden = Garden.objects.create(
                 sector=request.data["sector"],
                 avenue=request.data["avenue"],
                 number=request.data["number"],
                 area=request.data["area"],
                 status=request.data["status"],
-                
+
             )
             if request.data.get("leaseholderID"):
                 newgarden.leaseholderID = Account.objects.get(id = request.data["leaseholderID"])
@@ -86,9 +102,7 @@ class GardensCRUD(APIView):
             return Response({"success": "Garden created successfully."}, status=status.HTTP_201_CREATED)
         else :
             return Response({"error": "You don't have permission to create gardens."}, status=status.HTTP_403_FORBIDDEN)
-        
-    
-    
+
     @extend_schema(
     summary="Edit garden",
     request=inline_serializer(
@@ -102,36 +116,41 @@ class GardensCRUD(APIView):
             "leaseholderID": serializers.IntegerField(),
             "status": serializers.CharField(),
         },
-    ),  
-   
+    ),
+
     )
     def patch(self, request):
         if not request.user.is_authenticated:
             return Response({"error": "You don't have permission to edit gardens."}, status=status.HTTP_403_FORBIDDEN)
-        if not request.data["id"]:
-                return Response({"error": "Garden ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get("id") or not request.data.get("sector") or not request.data.get("avenue") \
+                or not request.data.get("number") or not request.data.get("area") or not request.data.get("status"):
+            return Response({"error": "Sector, avenue, number, area, status and Garden ID are required."},
+                            status=status.HTTP_400_BAD_REQUEST)
         if not Garden.objects.filter(id=request.data["id"]).exists():
             return Response({"error": "Garden doesn't exist."}, status=status.HTTP_400_BAD_REQUEST)
         garden = Garden.objects.get(id=request.data["id"])
-        if request.data.get("sector"):
-            garden.sector = request.data["sector"]
-        if request.data.get("avenue"):
-            garden.avenue = request.data["avenue"]
-        if request.data.get("number"):
-            garden.number = request.data["number"]
-        if request.data.get("area"):
-            garden.area = request.data["area"]
+        garden.sector = request.data["sector"]
+        garden.avenue = request.data["avenue"]
+        garden.number = request.data["number"]
+        garden.area = request.data["area"]
+
         if request.data.get("leaseholderID"):
+            if not is_leaseholder_valid(request.data.get("leaseholderID")):
+                return Response({"error": "Leaseholder with given ID does not exist or has another garden."},
+                                status=status.HTTP_400_BAD_REQUEST)
             garden.last_leaseholder = garden.leaseholderID
             if request.data["leaseholderID"] == "None":
                 garden.leaseholderID = None
             else:
                 garden.leaseholderID = Account.objects.get(id = request.data["leaseholderID"])
-        if request.data.get("status"):
-            garden.status = request.data["status"]
+
+        if request.data.get("status") not in valid_garden_statuses:
+            return Response({"error": "Invalid status value. Please use 'dostępna' or 'niedostępna'."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        garden.status = request.data["status"]
         garden.save()
-        return Response({"success": "Garden edited successfully."}, status=status.HTTP_200_OK)  
-        
+        return Response({"success": "Garden edited successfully."}, status=status.HTTP_200_OK)
+
     @extend_schema(
     summary="Delete garden",
     parameters=[

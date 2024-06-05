@@ -43,7 +43,7 @@ export class AddCounterDialogComponent {
     this.initData()
     this.addCounterForm = formBuilder.group({
       id: ['', [Validators.required, uniqueCounterIdValidator(this.data.counters)]],
-      address: [''],
+      address: ['', [Validators.required]],
       measurement: [0, [Validators.required, Validators.min(0)]],
       sector: [null],
       avenue: [null],

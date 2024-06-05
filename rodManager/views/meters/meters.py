@@ -1,9 +1,3 @@
-
-
-
-
-
-
 from itertools import chain
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, OpenApiResponse
 from rest_framework import status
@@ -15,6 +9,8 @@ from rodManager.dir_models.record import Record, RecordSerializer
 from rodManager.dir_models.garden import Garden
 import datetime
 
+
+valid_meter_types = ["woda", "prąd"]
 
 class MetersCRUD(APIView):
 
@@ -94,22 +90,46 @@ class MetersCRUD(APIView):
     )
     def post(self, request):
         if request.user.is_authenticated:
+            serial = request.data.get("serial")
+            meter_type = request.data.get("type")
+            address = request.data.get("adress")
+            garden_id = request.data.get("garden")
+
             if not request.data.get("serial") or not request.data.get("type"):
                 return Response({"error": "Serial and type are required."}, status=status.HTTP_400_BAD_REQUEST)
             
             if Meter.objects.filter(serial=request.data["serial"]).exists():
                 return Response({"error": "Meter already exists."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            newmeter = Meter.objects.create(
-                serial=request.data["serial"],
-                type=request.data["type"],
-            )
-            if request.data.get("adress"):
-                newmeter.adress = request.data["adress"]
-            if request.data.get("garden"):
+
+            # Walidacja czy typ licznika jest poprawny
+            if meter_type not in valid_meter_types:
+                return Response({"error": "Type must be either 'woda' or 'prąd'."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Walidacja czy istnieje licznik o podanym numerze seryjnym
+            if Meter.objects.filter(serial=serial).exists():
+                return Response({"error": "Meter already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Walidacja adresu
+            if not address:
+                return Response({"error": "Adress cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if garden_id:
                 if not Garden.objects.filter(id=request.data["garden"]).exists():
                     return Response({"error": "Garden does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-                newmeter.garden = Garden.objects.get(id=request.data["garden"])
+
+                # Walidacja czy w ogrodzie nie ma już meter o podanym typie
+                if Meter.objects.filter(garden_id=garden_id, type=meter_type).exists():
+                    return Response({"error": "Garden already has a meter of this type."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+            newmeter = Meter(
+                serial=serial,
+                type=meter_type,
+                adress=address,
+                garden=Garden.objects.get(id=garden_id) if garden_id else None
+            )
+
             if request.data.get("value"):
                 Record.objects.create(
                     meter=newmeter,

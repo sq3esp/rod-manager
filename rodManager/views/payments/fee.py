@@ -88,6 +88,8 @@ class FeeView(APIView):
     @permission_required()
     def post(self, request):
         serializer = AddFeeSerializer(data=request.data)
+        if request.data.get("value") <= 0:
+            return Response({"error": "Value must be greater than 0."}, status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
