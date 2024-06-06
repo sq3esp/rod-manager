@@ -347,17 +347,13 @@ export class ListOfUsersService {
         );
     }
 
-    getProfileById(id: number | null): Observable<Profile | undefined> {
+    getProfileById(id: string | null): Observable<Profile | undefined> {
         const url = `api/accounts/${id}/`;
         return this.httpClient.get<Profile>(url);
     }
 
-    // editProfile(profile: any): Observable<any>{
-    //     const index = this.profiles.findIndex(p => p.id === profile.id);
-    //     this.profiles[index] = profile;
-    //     return of(null)
-    // }
-    editProfile(profile: any,id: number | null) {
+
+    editProfile(profile: any,id: string | null) {
         const url = `api/accounts/${id}/`;
         console.log(profile);
 

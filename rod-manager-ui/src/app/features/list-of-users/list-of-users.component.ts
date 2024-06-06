@@ -78,8 +78,11 @@ export class ListOfUsersComponent {
   }
 
   navigateToProfileComponent(id: string) {
-    this.router.navigate(['/user-info', id]);
+    let idTemp = Number(id);
+    this.router.navigate(['/user-info', ((idTemp*2137))]);
   }
+
+
 
   mapAccountStatusesToTranslated(status: Role[] | undefined): string | undefined {
     if (!status) {

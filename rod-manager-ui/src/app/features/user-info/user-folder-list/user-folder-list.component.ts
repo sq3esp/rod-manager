@@ -261,7 +261,7 @@ export class UserFolderListComponent
 
   updateDocumentsListFromLevel(level: number)
   {
-    this.documentsService.getUserDocuments(this.userId)
+    this.documentsService.getUserDocuments(this.userId.toString())
       .subscribe({
         next: (result: Document[]) =>
         {

@@ -12,7 +12,7 @@ urlpatterns = [
         name="documentbyid",
     ),
     path(
-        "by-user-id/<int:user_id>/",
+        "by-user-id/<str:user_id>/",
         documentbyuserid.UserDocumentByUserIdView.as_view(),
         name="documentbyuserid",
     ),

@@ -84,7 +84,7 @@ export class DocumentsService {
     return this.httpClient.post(this.rodDocUrl, formData);
   }
 
-  getUserDocuments(userID: number): Observable<Document[]> {
+  getUserDocuments(userID: string): Observable<Document[]> {
     const url = this.userDocUrl + 'by-user-id/' + userID + '/';
     return this.httpClient.get<Document[]>(url);
   }

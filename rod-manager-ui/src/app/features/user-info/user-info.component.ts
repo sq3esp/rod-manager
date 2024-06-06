@@ -8,7 +8,7 @@ import {findGardenByUserID,} from "../list-of-garden-plot/GardenService";
 import {ListOfUsersService} from "../list-of-users/list-of-users.service";
 import {BackendGardenService} from "../list-of-garden-plot/backend-garden.service";
 import {StorageService} from "../../core/storage/storage.service";
-import {forkJoin} from "rxjs";
+import {finalize, forkJoin} from "rxjs";
 import {UserInfoService} from "./user-info.service";
 import {NgxSpinnerService} from "ngx-spinner";
 import {
@@ -59,6 +59,10 @@ export class UserInfoComponent {
   showAddListForm = false;
   selectedFile: File | null = null;
 
+  isMyProfile: boolean = false;
+
+
+
 
   constructor(
     private route: ActivatedRoute,
@@ -95,46 +99,136 @@ export class UserInfoComponent {
     })
   }
 
+  // ngOnInit() {
+  //   this.route.params.subscribe(params => {
+  //     this.isAvailableToEdit = true
+  //     this.id = parseInt(params['id'], 10)
+  //     this.spinner.show()
+  //     this.loadData()
+  //   });
+  // }
+
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.isAvailableToEdit = true
-      this.id = parseInt(params['id'], 10)
-      this.spinner.show()
-      this.loadData()
+      const idParam = params['id'];
+      this.isAvailableToEdit = true;
+      if (idParam) {
+
+        this.id = (parseInt(idParam, 10)/2137);
+        this.spinner.show();
+        this.loadData(true);
+      } else {
+        this.isMyProfile = true;
+        this.loadData(false)
+      }
     });
   }
 
-  loadData() {
-    forkJoin({
-      gardenPlots: this.backendGardenService.getAllGardenPlots(),
-      profile: this.listOfUsersService.getProfileById(this.id),
-      myProfile: this.userInfoService.getMyProfile(),
-      documents: this.documentsService.getUserDocuments(this.id),
-    }).subscribe(
-      {
-        next: data => {
-          this.gardenPlots = data.gardenPlots;
-          this.profile = data.profile;
-          this.documents = data.documents;
-          this.myProfile = data.myProfile
 
-          const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
-          if(gardenPlot){
-            this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
+  loadData(haveId:boolean) {
+    if(!haveId)
+      {
+        this.userInfoService.getMyProfile().subscribe({
+          next :data =>{
+            this.myProfile = data
+            // @ts-ignore
+            this.id = this.myProfile?.id
+
+
+          },complete:()=>{
+
+            forkJoin({
+              gardenPlots: this.backendGardenService.getAllGardenPlots(),
+              profile: this.listOfUsersService.getProfileById("myAccount"),
+              documents: this.documentsService.getUserDocuments("myAccount"),
+            }).subscribe(
+              {
+                next: data => {
+                  this.gardenPlots = data.gardenPlots;
+                  this.profile = data.profile;
+                  this.documents = data.documents;
+                  const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
+                  if(gardenPlot){
+                    this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
+                  }
+                  else this.gardenPlotAdress = null
+                  this.initData()
+                  this.spinner.hide()
+                },
+                error: error => {
+                  console.error(error);
+                  this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
+                  this.router.navigate(['/403']);
+                  this.spinner.hide()
+                }
+              })
+          },
+        })
+      }
+    else {
+      forkJoin({
+        gardenPlots: this.backendGardenService.getAllGardenPlots(),
+        profile: this.listOfUsersService.getProfileById( (this.id).toString()),
+        myProfile: this.userInfoService.getMyProfile(),
+        documents: this.documentsService.getUserDocuments(this.id.toString()),
+      }).subscribe(
+        {
+          next: data => {
+            this.gardenPlots = data.gardenPlots;
+            this.profile = data.profile;
+            this.documents = data.documents;
+            this.myProfile = data.myProfile
+
+            const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
+            if (gardenPlot) {
+              this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
+            } else this.gardenPlotAdress = null
+            this.initData()
+            this.spinner.hide()
+          },
+          error: error => {
+            console.error(error);
+            this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
+            this.router.navigate(['/403']);
+            this.spinner.hide()
           }
-          else this.gardenPlotAdress = null
-          this.initData()
-          this.spinner.hide()
-        },
-        error: error => {
-          console.error(error);
-          this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
-          this.router.navigate(['/403']);
-          this.spinner.hide()
-        }
-      })
-    console.error();
+        })
+      console.error();
+    }
   }
+
+
+  // loadData(haveId:boolean) {
+  //   forkJoin({
+  //     gardenPlots: this.backendGardenService.getAllGardenPlots(),
+  //     profile: this.listOfUsersService.getProfileById(this.id),
+  //     myProfile: this.userInfoService.getMyProfile(),
+  //     documents: this.documentsService.getUserDocuments(this.id),
+  //   }).subscribe(
+  //     {
+  //       next: data => {
+  //         this.gardenPlots = data.gardenPlots;
+  //         this.profile = data.profile;
+  //         this.documents = data.documents;
+  //         this.myProfile = data.myProfile
+  //
+  //         const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
+  //         if(gardenPlot){
+  //           this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
+  //         }
+  //         else this.gardenPlotAdress = null
+  //         this.initData()
+  //         this.spinner.hide()
+  //       },
+  //       error: error => {
+  //         console.error(error);
+  //         this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
+  //         this.router.navigate(['/403']);
+  //         this.spinner.hide()
+  //       }
+  //     })
+  //   console.error();
+  // }
 
   initData() {
     this.isAvailableToEditProfile()
@@ -296,7 +390,16 @@ export class UserInfoComponent {
         groups: newStatus,
       };
 
-      this.listOfUsersService.editProfile(newUser, this.id).subscribe({
+      let tempId
+
+      if(this.isMyProfile){
+        tempId = "myAccount"
+      }
+      else {
+        tempId = this.id.toString()
+      }
+
+      this.listOfUsersService.editProfile(newUser, tempId).subscribe({
         error: err => {
           console.error(err)
           this.toastr.error("Ups, Edycja profilu zakończona niepowodzeniem", 'Błąd');
@@ -368,7 +471,7 @@ export class UserInfoComponent {
       this.spinner.show()
       this.documentsService.postUserDocuments(newDocument, this.id).subscribe({
         next: data => {
-          this.documentsService.getUserDocuments(this.id)
+          this.documentsService.getUserDocuments(this.isMyProfile ? "myAccount" : this.id.toString())
             .subscribe((result: Document[]) => {
               this.documents = result
               this.showAddDocumentForm = false
@@ -390,7 +493,7 @@ export class UserInfoComponent {
       this.spinner.show()
       this.documentsService.postUserDocuments(newLeaf, this.id).subscribe((res) => {
         // this.updateDocumentsList()
-        this.documentsService.getUserDocuments(this.id)
+        this.documentsService.getUserDocuments(this.isMyProfile ? "myAccount" : this.id.toString())
           .subscribe({
             next: result => {
               this.documents = result
@@ -409,7 +512,7 @@ export class UserInfoComponent {
   }
 
   onItemAdded() {
-    this.documentsService.getUserDocuments(this.id)
+    this.documentsService.getUserDocuments(this.isMyProfile ? "myAccount" : this.id.toString())
       .subscribe((result: Document[]) => {
         this.documents = result
       });

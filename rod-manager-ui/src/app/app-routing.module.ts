@@ -43,6 +43,7 @@ const routes: Routes = [
   { path: 'list-of-gardeneirs', component: ListOfGardeneirsComponent, canActivate: [AuthGuard], data: { expectedRoles: [Role.ADMIN,Role.MANAGER, Role.NON_TECHNICAL_EMPLOYEE] } },
   { path: 'list-of-users', component: ListOfUsersComponent, canActivate: [AuthGuard], data: { expectedRoles: [Role.ADMIN,Role.MANAGER] } },
   { path: 'user-info/:id', component: UserInfoComponent},
+  { path: 'user-info', component: UserInfoComponent},
   { path: 'counters', component: CountersComponent, canActivate: [AuthGuard], data: { expectedRoles: [Role.ADMIN,Role.MANAGER, Role.TECHNICAL_EMPLOYEE] } },
   { path: 'my-garden-plot-info', component: GardenPlotInfoComponent, canActivate: [AuthGuard], data: { expectedRoles: [Role.GARDENER] }},
   { path: 'payments', component: PaymentsComponent, canActivate: [AuthGuard], data: { expectedRoles: [Role.ADMIN,Role.MANAGER] } },

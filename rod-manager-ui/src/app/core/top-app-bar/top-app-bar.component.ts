@@ -105,11 +105,13 @@ export class TopAppBarComponent {
     }
 
     navigateToProfileComponent() {
-        let id: number;
-        this.userInfoService.getMyProfile().subscribe((result: Profile) => {
-            id = result.id;
-            this.router.navigate(['/user-info', id]);
-        });
+        // let id: number;
+        // this.userInfoService.getMyProfile().subscribe((result: Profile) => {
+        //     id = result.id;
+        //     this.router.navigate(['/user-info', id]);
+        // });
+        //
+        this.router.navigate(['/user-info']);
     }
 
     changeFont() {
