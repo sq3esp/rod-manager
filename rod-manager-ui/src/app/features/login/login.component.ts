@@ -71,11 +71,7 @@ export class LoginComponent implements OnInit{
     this.authService.login(user).subscribe({
       next: data => {
         this.showSecondDialog(user.email,user.password)
-        this.toastr.success('Zalogowano!', 'Sukces');
-        this.storageService.setTokens(data.access, data.refresh);
-        this.storageService.setRoles(data.roles);
         this.spinner.hide();
-        // this.router.navigate(['home'])
       },
       error: error => {
         this.toastr.error('Ups, nie udało się zalogowoać', 'Error');
@@ -85,10 +81,10 @@ export class LoginComponent implements OnInit{
     });
   }
 
-  showSecondDialog(user:string,password:string) {
+  showSecondDialog(email:string,password:string) {
     const dialogRef = this.dialog.open(SecondLoginComponent, {
       width: '4000px',
-      data: {user, password},
+      data: {email, password},
     });
 
     dialogRef.afterClosed().subscribe(() => {

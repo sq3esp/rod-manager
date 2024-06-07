@@ -6,20 +6,20 @@
       </div>
     </mat-card-header>
     <mat-card-content class="row-item card-content-spacing">
-      <form class="form-container" [formGroup]="resetPasswordFrom">
+      <form class="form-container" [formGroup]="codeForm">
         <div class="row-container">
           <div class="row-item">
             <mat-form-field class="full-width">
-              <input matInput type="password" formControlName="password" placeholder="kod" required autocomplete="new-password">
+              <input matInput type="password" formControlName="code" placeholder="kod" required autocomplete="new-password">
               <mat-label>Kod</mat-label>
-              <mat-error *ngFor="let error of validationErrors('password')">
+              <mat-error *ngFor="let error of validationErrors('code')">
                 {{ error.message }}
               </mat-error>
             </mat-form-field>
           </div>
 
           <div class="row-item button-section">
-            <button mat-raised-button class="button" color="primary" type="submit">
+            <button mat-raised-button class="button" color="primary" type="submit" (click)="login()">
               Zaloguj się
             </button>
           </div>

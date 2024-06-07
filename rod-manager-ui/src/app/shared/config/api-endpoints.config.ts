@@ -2,6 +2,7 @@ export const API_ENDPOINTS = {
   // Public endpoints (do not require authentication)
   public: {
     login: '/api/login/',
+    loginSecond: '/api/login-second/',
     loginGoogle: '/api/login/google/',
     refreshToken: '/api/token/refresh/',
     register: '/api/register/',

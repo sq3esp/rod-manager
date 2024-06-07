@@ -3,19 +3,22 @@ from rest_framework import serializers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from ..dir_models.account import Account
-from ..libs.mailsending import send_mail_from_template
+
+from rest_framework.response import Response
+from rest_framework import serializers, status
 
 
-class CustomLoginSerializer(serializers.Serializer):
+class CustomLoginSerializer2(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
+    code = serializers.CharField(required=True)
 
 
-class CustomLogin(TokenObtainPairView):
+class CustomLogin2(TokenObtainPairView):
     @extend_schema(
-        summary="Login",
-        description="Login to the system.",
-        request=CustomLoginSerializer,
+        summary="Second_Login",
+        description="Second_Login to the system.",
+        request=CustomLoginSerializer2,
         responses={
             200: OpenApiResponse(
                 description="Login successful.",
@@ -41,24 +44,20 @@ class CustomLogin(TokenObtainPairView):
         },
     )
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if response.status_code == 200:
-            print("dupa")
-            send_mail_from_template(
-                "second_login",
-                "Logowanie Dwuetapowe",
-                [
-                    "tomek@plociennik.info", "roszkolgaming@gmail.com"
-                ],  # TODO zmienić maila na user.email, ale aktualnie maile to np. admin@admin.admin więc nie działa
-                {
-                    "code": "dupa",
-                },
+
+        if request.data.get("code") is None:
+            return Response(
+                {"error": "code is required."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-            # TODO zmienić
+
+        if(request.data["code"] == "dupa"):
+            response = super().post(request, *args, **kwargs)
             roles = Account.objects.get(email=request.data["email"]).groups
             response.data["roles"] = [role.name for role in roles.all()]
             return response
         else:
-            roles = Account.objects.get(email=request.data["email"]).groups
-            response.data["roles"] = [role.name for role in roles.all()]
-            return response
+            return Response(
+                {"error": "Code is not Correct"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
