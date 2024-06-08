@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import Group
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers
@@ -31,6 +33,18 @@ class UpdateAccountSerializer(serializers.Serializer):
 
 
 class AccountByIdView(APIView):
+    def get_account_data(self, account):
+        return {
+            "id": account.id,
+            "first_name": account.first_name,
+            "last_name": account.last_name,
+            "email": account.email,
+            "phone": account.phone,
+            "groups": [group.name for group in account.groups.all()],
+            "balance": account.calculate_balance(),
+            "uid": account.uid,
+        }
+
     @extend_schema(
         summary="Get account by id",
         responses={
@@ -63,45 +77,23 @@ class AccountByIdView(APIView):
     )
     @permission_required()
     def get(self, request, account_id):
-
-        if(account_id !='myAccount'):
-            account_id = int(account_id)
-
+        if account_id != 'myAccount':
             try:
-                account = Account.objects.get(id=account_id)
-                response_data = {
-                    "id": account.id,
-                    "first_name": account.first_name,
-                    "last_name": account.last_name,
-                    "email": account.email,
-                    "phone": account.phone,
-                    "groups": [group.name for group in account.groups.all()],
-                    "balance": account.calculate_balance(),
-                }
-
+                # wyszukac po uid
+                # tutaj sprawdz
+                uuid.UUID(account_id)
+                account = Account.objects.get(uid=account_id)
                 if (
-                    not request.user.groups.filter(name__in=["MANAGER", "ADMIN"]).exists()
-                    and request.user != account
+                        not request.user.groups.filter(name__in=["MANAGER", "ADMIN"]).exists()
+                        and request.user != account
                 ):
                     return Response({"error": "You cannot view this account."}, status=400)
-
-                return Response(response_data)
+                response_data = self.get_account_data(account)
             except Account.DoesNotExist:
                 return Response({"error": "Account does not exist."}, status=400)
         else:
-            try:
-                response_data = {
-                    "id": request.user.id,
-                    "first_name": request.user.first_name,
-                    "last_name": request.user.last_name,
-                    "email": request.user.email,
-                    "phone": request.user.phone,
-                    "groups": [group.name for group in request.user.groups.all()],
-                    "balance": request.user.calculate_balance(),
-                }
-                return Response(response_data)
-            except Account.DoesNotExist:
-                return Response({"error": "Account does not exist."}, status=400)
+            response_data = self.get_account_data(request.user)
+        return Response(response_data)
 
     @extend_schema(
         request=UpdateAccountSerializer,
@@ -133,76 +125,28 @@ class AccountByIdView(APIView):
             ),
         },
     )
-    @permission_required()
     def patch(self, request, account_id):
-        if(account_id !='myAccount'):
-            account_id = int(account_id)
-            try:
-                account = Account.objects.get(id=account_id)
-                if (
-                    account.groups.filter(name__in=["MANAGER", "ADMIN"]).exists()
-                    and not request.user.groups.filter(name="ADMIN").exists()
-                    and account != request.user
-                ) or (
-                    account != request.user
-                    and not request.user.groups.filter(
-                        name__in=["MANAGER", "ADMIN"]
-                    ).exists()
-                ):
-                    return Response({"error": "You cannot edit this account."}, status=400)
-                serializer = UpdateAccountSerializer(
-                    instance=account, data=request.data, partial=True
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-
-                account.refresh_from_db()
-
-                response_data = {
-                    "id": account.id,
-                    "first_name": account.first_name,
-                    "last_name": account.last_name,
-                    "email": account.email,
-                    "phone": account.phone,
-                    "groups": [group.name for group in account.groups.all()],
-                }
-
-                return Response(response_data)
-            except Account.DoesNotExist:
-                return Response({"error": "Account does not exist."}, status=400)
-
+        if account_id == 'myAccount':
+            account = request.user
         else:
-
             try:
-                account = Account.objects.get(id=request.user.id)
-                if (
-                        account.groups.filter(name__in=["MANAGER", "ADMIN"]).exists()
-                        and not request.user.groups.filter(name="ADMIN").exists()
-                        and account != request.user
-                ) or (
-                        account != request.user
-                        and not request.user.groups.filter(
-                    name__in=["MANAGER", "ADMIN"]
-                ).exists()
-                ):
-                    return Response({"error": "You cannot edit this account."}, status=400)
-                serializer = UpdateAccountSerializer(
-                    instance=account, data=request.data, partial=True
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-
-                account.refresh_from_db()
-
-                response_data = {
-                    "id": account.id,
-                    "first_name": account.first_name,
-                    "last_name": account.last_name,
-                    "email": account.email,
-                    "phone": account.phone,
-                    "groups": [group.name for group in account.groups.all()],
-                }
-
-                return Response(response_data)
+                account = Account.objects.get(uid=account_id)
             except Account.DoesNotExist:
-                return Response({"error": "Account does not exist."}, status=400)
+                return Response({"error": "Account does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if (
+                (account.groups.filter(name__in=["MANAGER", "ADMIN"]).exists() and
+                 not request.user.groups.filter(name="ADMIN").exists() and account != request.user) or
+                (account != request.user and
+                 not request.user.groups.filter(name__in=["MANAGER", "ADMIN"]).exists())
+        ):
+            return Response({"error": "You cannot edit this account."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UpdateAccountSerializer(instance=account, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        account.refresh_from_db()
+        response_data = self.get_account_data(account)
+
+        return Response(response_data)

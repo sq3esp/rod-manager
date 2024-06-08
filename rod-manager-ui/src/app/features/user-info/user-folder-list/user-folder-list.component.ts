@@ -15,7 +15,7 @@ export class UserFolderListComponent
   @Input() documents!: Document[] | undefined;
   @Input() level!: number
   @Input() parent!: number | null
-  @Input() userId!: number
+  @Input() userId!: string
   @Output() itemAdded: EventEmitter<void> = new EventEmitter<void>();
   addFileForm: FormGroup;
   editFileForm: FormGroup;
@@ -144,7 +144,7 @@ export class UserFolderListComponent
       const newTitle: string = this.addListForm.get('name')?.value;
       const newDocument: Leaf = { name: newTitle, parent: item.id };
       this.spinner.show()
-      this.documentsService.postUserDocuments(newDocument, this.userId).subscribe({
+      this.documentsService.postUserDocuments(newDocument, this.userId.toString()).subscribe({
         next: value =>
         {
           this.updateDocumentsListFromLevel(this.level)
@@ -187,6 +187,7 @@ export class UserFolderListComponent
   delete(item: Document)
   {
     this.spinner.show()
+    // tutaj zmienić na uid tez
     this.documentsService.deleteUserDocument(item.id).subscribe({
       next: value =>
       {

@@ -9,4 +9,5 @@ export interface Profile {
   groups: Role[];
   balance: number;
   paymentDueDate: Date;
+  uid: string;
 }

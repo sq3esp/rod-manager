@@ -89,7 +89,8 @@ export class DocumentsService {
     return this.httpClient.get<Document[]>(url);
   }
 
-  putUserDocuments(leaf: Leaf, id: number, userID: number): Observable<any> {
+  putUserDocuments(leaf: Leaf, id: number, userID: string): Observable<any> {
+    // tutaj zmienic url
     const url = this.userDocUrl + 'by-document-id/' + id + '/';
     if (leaf.file || leaf.file === null) {
       const formData = new FormData();
@@ -130,7 +131,7 @@ export class DocumentsService {
     }
   }
 
-  postUserDocuments(leaf: Leaf, userID: number): Observable<any> {
+  postUserDocuments(leaf: Leaf, userID: string): Observable<any> {
     if (leaf.file) {
       const formData = new FormData();
 

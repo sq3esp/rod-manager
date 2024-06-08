@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -60,6 +60,5 @@ class UserDocumentByIdView(APIView):
     def delete(self, request, document_id):
         document = get_object_or_404(UserDocument, pk=document_id)
         if document.file:
-            document.file.delete()
-        document.delete()
+            document.delete()
         return Response(status=204)

@@ -78,8 +78,8 @@ export class ListOfUsersComponent {
   }
 
   navigateToProfileComponent(id: string) {
-    let idTemp = Number(id);
-    this.router.navigate(['/user-info', ((idTemp*2137))]);
+    // przekazuje uid zamiast id
+    this.router.navigate(['/user-info', (id)]);
   }
 
 
