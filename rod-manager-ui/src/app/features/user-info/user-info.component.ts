@@ -8,7 +8,7 @@ import {findGardenByUserID,} from "../list-of-garden-plot/GardenService";
 import {ListOfUsersService} from "../list-of-users/list-of-users.service";
 import {BackendGardenService} from "../list-of-garden-plot/backend-garden.service";
 import {StorageService} from "../../core/storage/storage.service";
-import {finalize, forkJoin} from "rxjs";
+import {forkJoin, of} from "rxjs";
 import {UserInfoService} from "./user-info.service";
 import {NgxSpinnerService} from "ngx-spinner";
 import {
@@ -103,86 +103,69 @@ export class UserInfoComponent {
     this.route.params.subscribe(params => {
       const idParam = params['id'];
       this.isAvailableToEdit = true;
-      if (idParam) {
 
-        // this.id = (parseInt(idParam, 10));
+      if (idParam) {
         this.uid = idParam;
         this.spinner.show();
-        this.loadData(true);
+        this.loadData(idParam);
       } else {
         this.isMyProfile = true;
-        this.loadData(false)
+        this.loadData("myAccount");
       }
     });
   }
 
-   loadData(haveId:boolean) {
-     if (!haveId) {
-       this.userInfoService.getMyProfile().subscribe({
-         next: data => {
-           this.myProfile = data
-           // @ts-ignore
-           this.uid = this.myProfile?.id
+  loadData(id: string) {
+    if (id === "myAccount") {
+      this.userInfoService.getMyProfile().subscribe({
+        next: data => {
+          this.myProfile = data;
+          // @ts-ignore
+          this.uid = this.myProfile?.id;
+          this.fetchData("myAccount");
+        },
+        error: error => {
+          this.handleError(error);
+        }
+      });
+    } else {
+      this.fetchData(id);
+    }
+  }
 
-         }, complete: () => {
+  fetchData(id: string) {
+    forkJoin({
+      gardenPlots: this.backendGardenService.getAllGardenPlots(),
+      profile: this.listOfUsersService.getProfileById(id),
+      documents: this.documentsService.getUserDocuments(id),
+      myProfile: id === "myAccount" ? this.userInfoService.getMyProfile() : of(null),
+    }).subscribe({
+      next: data => {
+        this.gardenPlots = data.gardenPlots;
+        this.profile = data.profile;
+        this.documents = data.documents;
 
-           forkJoin({
-             gardenPlots: this.backendGardenService.getAllGardenPlots(),
-             profile: this.listOfUsersService.getProfileById("myAccount"),
-             documents: this.documentsService.getUserDocuments("myAccount"),
-           }).subscribe(
-             {
-               next: data => {
-                 this.gardenPlots = data.gardenPlots;
-                 this.profile = data.profile;
-                 this.documents = data.documents;
-                 const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
-                 if (gardenPlot) {
-                   this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
-                 } else this.gardenPlotAdress = null
-                 this.initData()
-                 this.spinner.hide()
-               },
-               error: error => {
-                 console.error(error);
-                 this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
-                 this.router.navigate(['/403']);
-                 this.spinner.hide()
-               }
-             })
-         },
-       })
-     } else {
-       forkJoin({
-         gardenPlots: this.backendGardenService.getAllGardenPlots(),
-         profile: this.listOfUsersService.getProfileById(this.uid),
-         myProfile: this.userInfoService.getMyProfile(),
-         documents: this.documentsService.getUserDocuments(this.uid),
-       }).subscribe(
-         {
-           next: data => {
-             this.gardenPlots = data.gardenPlots;
-             this.profile = data.profile;
-             this.documents = data.documents;
-             this.myProfile = data.myProfile
+        if (data.myProfile) {
+          this.myProfile = data.myProfile;
+        }
 
-             const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
-             if (gardenPlot) {
-               this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
-             } else this.gardenPlotAdress = null
-             this.initData()
-             this.spinner.hide()
-           },
-           error: error => {
-             console.error(error);
-             this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
-             this.router.navigate(['/403']);
-             this.spinner.hide()
-           }
-         })
-       console.error();
-     }
-   }
+        const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots);
+        this.gardenPlotAdress = gardenPlot ? `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}` : null;
+        this.initData();
+        this.spinner.hide();
+      },
+      error: error => {
+        this.handleError(error);
+      }
+    });
+  }
+
+  handleError(error: any) {
+    console.error(error);
+    this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
+    this.router.navigate(['/403']);
+    this.spinner.hide();
+  }
 
   initData() {
     this.isAvailableToEditProfile()
@@ -194,7 +177,6 @@ export class UserInfoComponent {
     if ((this.profile?.groups.includes(Role.ADMIN)) || (this.profile?.groups.includes(Role.MANAGER))) {
       if (this.storageService.getRoles().includes(Role.MANAGER)) {
         if(this.profile?.id !== this.myProfile?.id){
-          // tutaj problem
         this.isAvailableToEdit = false;}
       }
     }

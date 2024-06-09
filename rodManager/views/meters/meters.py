@@ -97,9 +97,6 @@ class MetersCRUD(APIView):
 
             if not request.data.get("serial") or not request.data.get("type"):
                 return Response({"error": "Serial and type are required."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            if Meter.objects.filter(serial=request.data["serial"]).exists():
-                return Response({"error": "Meter already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Walidacja czy typ licznika jest poprawny
             if meter_type not in valid_meter_types:

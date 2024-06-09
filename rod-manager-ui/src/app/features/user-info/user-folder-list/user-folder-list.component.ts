@@ -187,7 +187,6 @@ export class UserFolderListComponent
   delete(item: Document)
   {
     this.spinner.show()
-    // tutaj zmienić na uid tez
     this.documentsService.deleteUserDocument(item.id).subscribe({
       next: value =>
       {

@@ -79,8 +79,6 @@ class AccountByIdView(APIView):
     def get(self, request, account_id):
         if account_id != 'myAccount':
             try:
-                # wyszukac po uid
-                # tutaj sprawdz
                 uuid.UUID(account_id)
                 account = Account.objects.get(uid=account_id)
                 if (

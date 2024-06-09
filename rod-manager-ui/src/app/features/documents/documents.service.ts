@@ -90,7 +90,6 @@ export class DocumentsService {
   }
 
   putUserDocuments(leaf: Leaf, id: number, userID: string): Observable<any> {
-    // tutaj zmienic url
     const url = this.userDocUrl + 'by-document-id/' + id + '/';
     if (leaf.file || leaf.file === null) {
       const formData = new FormData();
