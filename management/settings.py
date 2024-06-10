@@ -168,7 +168,7 @@ APPEND_SLASH = False
 AUTH_USER_MODEL = "rodManager.Account"
 
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
+MEDIA_ROOT = "/media"
 MEDIA_URL = "/mediafiles/"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

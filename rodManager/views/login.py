@@ -43,7 +43,6 @@ class CustomLogin(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         if response.status_code == 200:
-            print("dupa")
             send_mail_from_template(
                 "second_login",
                 "Logowanie Dwuetapowe",

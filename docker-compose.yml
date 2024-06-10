@@ -8,6 +8,7 @@ services:
       - 8000:8000
     volumes:
       - ./:/usr/src/
+      - media_volume:/media
     env_file:
       - ./.env.dev
   db:
@@ -25,7 +26,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     volumes:
-      - ./mediafiles:/home/app/web/mediafiles
+      - media_volume:/home/app/web/mediafiles
     ports:
       - 1337:1337
     depends_on:
