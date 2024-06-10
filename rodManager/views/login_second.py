@@ -1,3 +1,5 @@
+
+
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -6,6 +8,24 @@ from ..dir_models.account import Account
 
 from rest_framework.response import Response
 from rest_framework import serializers, status
+
+from ..dir_models.two_step_login import TwoStepLogin
+from django.utils import timezone
+from datetime import timedelta
+
+from django.contrib.auth import get_user_model
+from django.core.validators import validate_email
+from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from rodManager.dir_models.account import Account
+from rodManager.dir_models.passwordreset import PasswordReset
+from rodManager.libs.mailsending import send_mail_from_template
 
 
 class CustomLoginSerializer2(serializers.Serializer):
@@ -51,7 +71,16 @@ class CustomLogin2(TokenObtainPairView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if(request.data["code"] == "dupa"):
+        TwoStepLogin.objects.filter(valid_until__lt=timezone.now()).delete()
+
+        if not TwoStepLogin.objects.filter(token=request.data.get("code")).exists():
+            return Response(
+                {"error": "Token expired or does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        twoStep = TwoStepLogin.objects.get(token=request.data.get("code"))
+        if (twoStep.user.email == request.data.get("email")):
             response = super().post(request, *args, **kwargs)
             roles = Account.objects.get(email=request.data["email"]).groups
             response.data["roles"] = [role.name for role in roles.all()]
