@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "rodManager",
     "django_dump_load_utf8",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -187,3 +189,8 @@ GOOGLE_CLIENT_ID = (
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver_plus --cert-file /certs/cert.pem --key-file /certs/key.pem 0.0.0.0:8000
     ports:
       - 8000:8000
     volumes:
@@ -35,7 +35,7 @@ services:
       context: ./rod-manager-ui
       dockerfile: Dockerfile
     ports:
-      - "4200:80"  # Expose port 4200 (or any other port you wish to use)
+      - "4200:80" # Expose port 4200 (or any other port you wish to use)
     depends_on:
       - web # Replace with the name of your Django service
 

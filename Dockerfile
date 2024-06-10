@@ -15,3 +15,7 @@ RUN pip install -r requirements.txt
 
 # copy project
 COPY . .
+
+RUN mkdir /certs
+RUN cd /certs
+RUN openssl req -subj "/C=CA/ST=QC/O=Company Inc/CN=localhost" -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes

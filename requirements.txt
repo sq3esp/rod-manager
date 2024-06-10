@@ -10,3 +10,6 @@ psycopg2-binary==2.9.6
 gunicorn==21.2.0
 beautifulsoup4==4.12.2
 django-dump-load-utf8==0.0.4
+werkzeug==3.0.3
+django_extensions==3.2.3
+pyOpenSSL==24.1.0
