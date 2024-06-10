@@ -1,31 +1,34 @@
 from urllib.parse import quote
 
 from django.http import HttpResponse
-from django.views import View
-from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from rodManager.users.validate import permission_required
+from rodManager.dir_models.userdocument import UserDocument
 
-# TODO sprawdzic czy w sciezce jest userdocuments jezeli tak to git a jak nie to wywal blad
-class ProtectedFileView(View):
-    # @permission_required()
-    # def get(self, request, file_path):
-    #     try:
-    #         response = HttpResponse()
-    #         response["X-Accel-Redirect"] = f"/media/{quote(file_path)}"
-    #         response["Content-Type"] = ""
-    #
-    #         # if (
-    #         #     not request.user.groups.filter(name__in=["MANAGER", "ADMIN"]).exists()
-    #         # ):
-    #         #     return Response({"error": "You cannot view this account."}, status=403)
-    #         # TODO zrobic sprawdzenie dla danego konta
-    #
-    #         return response
-    #     except:
-    #         return Response({"error": "Account does not exist."}, status=400)
+
+class ProtectedFileView(APIView):
     def get(self, request, file_path):
-        response = HttpResponse()
-        response["X-Accel-Redirect"] = f"/media/{quote(file_path)}"
-        response["Content-Type"] = ""
-        return response
+        try:
+            if 'userdocuments' not in file_path:
+                return HttpResponse(status=400, content="Invalid file path.")
+
+            user_id = UserDocument.objects.all().filter(file=file_path).values("user_id")
+            print(user_id)
+            if user_id:
+                user_id2 = user_id[0]["user_id"]
+                if request.user.groups.filter(name__in=["MANAGER", "ADMIN"]).exists() or request.user.id == user_id2:
+                    pass
+                else:
+                    return HttpResponse(status=403, content="You don't have permission to access this file.")
+            else:
+                return HttpResponse(status=404, content="File not found.")
+
+            redirect_url = f"/media/{quote(file_path)}"
+
+            response = HttpResponse()
+            response["X-Accel-Redirect"] = redirect_url
+            response["Content-Type"] = "application/octet-stream"
+
+            return response
+        except:
+            return HttpResponse(status=404, content="Something went wrong.")

@@ -1,12 +1,10 @@
 from urllib.parse import quote
 
 from django.http import HttpResponse
-from django.views import View
-from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import serializers
+from rest_framework.views import APIView
 
-class AdminFileView(View):
 
+class AdminFileView(APIView):
     def get(self, request, file_path):
         try:
             if 'managerdocuments' not in file_path:
@@ -26,9 +24,3 @@ class AdminFileView(View):
             return response
         except:
             return HttpResponse(status=404, content="File does not exist.")
-
-    # def get(self, request, file_path):
-    #     response = HttpResponse()
-    #     response["X-Accel-Redirect"] = f"/media/{quote(file_path)}"
-    #     response["Content-Type"] = ""
-    #     return response

@@ -4,6 +4,8 @@ import { NgxSpinnerService } from "ngx-spinner";
 import { ToastrService } from "ngx-toastr";
 import { Document, Leaf } from "../../documents/document";
 import { DocumentsService } from "../../documents/documents.service";
+import {Observable} from "rxjs";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-user-folder-list',
@@ -32,7 +34,8 @@ export class UserFolderListComponent
     formBuilder: FormBuilder,
     private documentsService: DocumentsService,
     private spinner: NgxSpinnerService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private http: HttpClient
   )
   {
     this.addFileForm = formBuilder.group({
@@ -84,10 +87,34 @@ export class UserFolderListComponent
     return errors;
   }
 
-  downloadFile(link: string | undefined)
-  {
+  // downloadFile(link: string | undefined)
+  // {
+  //   const fullLink = "/api/protectedfile" + link;
+  //   window.open(fullLink, '_blank');
+  // }
+
+  downloadFile(link: string): void {
+    this.downloadFile2(link)
+      .subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.getFilenameFromPath(link);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }, error => {
+        console.error('Error downloading the file', error);
+      });
+  }
+
+  getFilenameFromPath(path: string): string {
+    const parts = path.split('/');
+    return parts[parts.length - 1];
+  }
+
+  downloadFile2(link: string): Observable<Blob> {
     const fullLink = "/api/protectedfile" + link;
-    window.open(fullLink, '_blank');
+    return this.http.get(fullLink, {responseType: 'blob'});
   }
 
   addNewDocument(item: Document)

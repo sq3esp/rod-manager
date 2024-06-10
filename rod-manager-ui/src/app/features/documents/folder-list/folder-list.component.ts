@@ -7,6 +7,7 @@ import {ToastrService} from "ngx-toastr";
 import {DocumentsService} from "../documents.service";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {StorageService} from "../../../core/storage/storage.service";
+import {Observable} from "rxjs";
 
 
 @Component({
@@ -91,379 +92,236 @@ export class FolderListComponent {
   // }
 
 
-
-
-
-downloadFile2(link: string | undefined) {
-  if (!link) {
-    console.error('File link is undefined');
-    return;
+  downloadFile(link: string): void {
+    this.downloadFile2(link)
+      .subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.getFilenameFromPath(link);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }, error => {
+        console.error('Error downloading the file', error);
+      });
   }
 
-  const fullLink = "/api/adminfile" + link;
-
-  const token = this.tokenStorageService.getAccessToken();
-  if (!token) {
-    console.error('Access token is not available');
-    return;
+  getFilenameFromPath(path: string): string {
+    const parts = path.split('/');
+    return parts[parts.length - 1];
   }
 
-  const headers = new Headers();
-  headers.append('Authorization', `Bearer ${token}`);
-
-  // @ts-ignore
-  fetch(fullLink, { headers, responseType: 'blob' })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to download file');
-      }
-
-      // Określ typ MIME na podstawie rozszerzenia pliku
-      const contentType = this.getContentTypeFromExtension(link);
-
-      // Utwórz nowy obiekt nagłówków z zaktualizowanym typem MIME
-      const updatedHeaders = new Headers(response.headers);
-      if (contentType) {
-        updatedHeaders.set('Content-Type', contentType);
-      }
-
-      return new Response(response.body, { headers: updatedHeaders });
-    })
-    .then(async response => {
-      const url = window.URL.createObjectURL(await response.blob());
-      window.open(url, '_blank');
-      window.URL.revokeObjectURL(url);
-    })
-    .catch(error => {
-      console.error('Error downloading the file', error);
-    });
-}
-
-getContentTypeFromExtension(filename: string | undefined, defaultType: string | null = 'application/octet-stream'): string | null {
-  if (!filename) {
-    return null;
+  downloadFile2(link: string): Observable<Blob> {
+    const fullLink = "/api/adminfile" + link;
+    return this.http.get(fullLink, {responseType: 'blob'});
   }
 
-  const extension = filename.split('.').pop();
-  if (!extension) {
-    return null;
-  }
 
-  switch (extension.toLowerCase()) {
-    case 'pdf':
-      return 'application/pdf';
-    case 'jpg':
-    case 'jpeg':
-      return 'image/jpeg';
-    case 'png':
-      return 'image/png';
-    // Dodaj inne rozszerzenia plików i odpowiadające im typy MIME według potrzeb
-    default:
-      return extension;
-  }
-}
-
-
-
-downloadFile(link: string | undefined) {
-  if (!link) {
-    console.error('File link is undefined');
-    return;
-  }
-
-  const fullLink = "/api/adminfile" + link;
-
-  const token = this.tokenStorageService.getAccessToken();
-  if (!token) {
-    console.error('Access token is not available');
-    return;
-  }
-
-  // const headers = new Headers();
-  // headers.append('Authorization', `Bearer ${token}`);
-
-  // @ts-ignore
-  fetch(fullLink, { headers, responseType: 'blob' })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to download file');
-      }
-      return response.blob();
-    })
-    .then(blob => {
-      // Tworzymy link do pobrania pliku
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = this.getFilenameFromPath(link); // Ustalamy nazwę pliku dla pobierania
-      a.click(); // Wywołujemy kliknięcie na linku, co wywoła pobranie pliku
-      window.URL.revokeObjectURL(url);
-    })
-    .catch(error => {
-      console.error('Error downloading the file', error);
-    });
-}
-
-getFilenameFromPath(path: string): string {
-  // Wyciągamy nazwę pliku z pełnej ścieżki
-  const parts = path.split('/');
-  return parts[parts.length - 1];
-}
-
-
-
-
-
-
-// downloadFile(link: string | undefined) {
-//   const fullLink = "/api/adminfile" + link;
-//
-//   // Pobranie tokenu z serwisu przechowującego tokeny
-//   const token = this.tokenStorageService.getAccessToken();
-//
-//   // Jeśli token istnieje, dodaj nagłówek z tokenem autoryzacyjnym
-//   if (token) {
-//     const headers = new HttpHeaders({
-//       'Authorization': `Bearer ${token}`
-//     });
-//
-//     // Wysłanie żądania pobrania pliku z uwzględnieniem nagłówka z tokenem
-//     this.http.get(fullLink, {
-//       headers: headers,
-//       responseType: 'blob' // Określenie typu odpowiedzi jako blob (dla plików)
-//     }).subscribe((data: Blob) => {
-//       // Tworzenie URL obiektu Blob
-//       const blob = new Blob([data], { type: 'application/octet-stream' });
-//       const url = window.URL.createObjectURL(blob);
-//
-//       // Otwarcie nowego okna z adresem URL pliku
-//       window.open(url, '_blank');
-//
-//       // Zwolnienie zasobów URL po zamknięciu okna
-//       window.URL.revokeObjectURL(url);
-//     });
-//   }
-// }
-
-
-addNewDocument(item
-:
-Document
-)
-{
-  if (this.addFileForm.valid && this.selectedFile) {
-    const newTitle: string = this.addFileForm.get('name')?.value;
-    const newDocument: Leaf = {name: newTitle, file: this.selectedFile, parent: item.id};
-    this.spinner.show()
-    this.documentsService.postDocuments(newDocument).subscribe({
-      next: value => {
-        this.updateDocumentsListFromLevel(this.level)
-        // this.itemAdded.emit();
-        this.showAddDocumentForm = false
-      }, error: error => {
-        console.error(error);
-        this.spinner.hide();
-        this.toastr.error('Nie udało się dodać dokumentu', 'Błąd')
-      }
-    });
-  }
-}
-
-editDocument(item
-:
-Document
-)
-{
-  if (this.editFileForm.valid) {
-    const newTitle: string = this.editFileForm.get('name')?.value;
-    const id = item.id
-
-    const newLeaf: Leaf = {name: newTitle, file: this.selectedFile, parent: this.parent};
-    this.spinner.show()
-    this.documentsService.putDocuments(newLeaf, id).subscribe({
-      next: value => {
-        this.updateDocumentsListFromLevel(this.level)
-        this.showEditDocumentForm = false
-      }, error: error => {
-        console.error(error);
-        this.spinner.hide();
-        this.toastr.error('Nie udało się edytować dokumentu', 'Błąd')
-      }
-    })
-  }
-}
-
-addNewList(item
-:
-Document
-)
-{
-  if (this.addListForm.valid) {
-    const newTitle: string = this.addListForm.get('name')?.value;
-    const newDocument: Leaf = {name: newTitle, parent: item.id};
-    this.spinner.show()
-    this.documentsService.postDocuments(newDocument).subscribe({
-      next: value => {
-        this.updateDocumentsListFromLevel(this.level)
-        // this.itemAdded.emit();
-        this.showAddListForm = false
-      }, error: error => {
-        console.error(error);
-        this.spinner.hide();
-        this.toastr.error('Nie udało się dodać folderu', 'Błąd')
-      }
-    });
-  }
-}
-
-editList(item
-:
-Document
-)
-{
-  if (this.editListForm.valid) {
-    const newTitle: string = this.editListForm.get('name')?.value;
-    const newDocument: Leaf = {name: newTitle, parent: this.parent};
-    this.documentsService.putDocuments(newDocument, item.id).subscribe({
-      next: value => {
-        this.spinner.show()
-        this.updateDocumentsListFromLevel(this.level)
-        // this.itemAdded.emit();
-        this.showAddListForm = false
-      },
-      error: error => {
-        console.error(error);
-        this.spinner.hide();
-        this.toastr.error('Nie udało się edytować folderu', 'Błąd')
-      }
-    });
-  }
-}
-
-delete (item
-:
-Document
-)
-{
-  this.spinner.show()
-  this.documentsService.deleteDocument(item.id).subscribe({
-    next: value => {
-      this.updateDocumentsListFromLevel(this.level)
-      // this.itemAdded.emit();
-    }, error: error => {
-      console.error(error);
-      this.spinner.hide();
-      this.toastr.error('Nie udało się usunąć', 'Błąd')
+  addNewDocument(item
+                   :
+                   Document
+  ) {
+    if (this.addFileForm.valid && this.selectedFile) {
+      const newTitle: string = this.addFileForm.get('name')?.value;
+      const newDocument: Leaf = {name: newTitle, file: this.selectedFile, parent: item.id};
+      this.spinner.show()
+      this.documentsService.postDocuments(newDocument).subscribe({
+        next: value => {
+          this.updateDocumentsListFromLevel(this.level)
+          // this.itemAdded.emit();
+          this.showAddDocumentForm = false
+        }, error: error => {
+          console.error(error);
+          this.spinner.hide();
+          this.toastr.error('Nie udało się dodać dokumentu', 'Błąd')
+        }
+      });
     }
-  });
-}
+  }
 
-toggleAddDocumentForm()
-{
-  this.showAddDocumentForm = !this.showAddDocumentForm;
-  this.addFileForm.reset()
-}
+  editDocument(item
+                 :
+                 Document
+  ) {
+    if (this.editFileForm.valid) {
+      const newTitle: string = this.editFileForm.get('name')?.value;
+      const id = item.id
 
-toggleEditDocumentForm(Document
-:
-Document
-)
-{
-  this.showEditDocumentForm = !this.showEditDocumentForm;
-  this.addFileForm.reset()
-  this.editFileForm.reset()
-  this.editFileForm.patchValue({name: Document.name})
-  this.selectedFile = null
-}
+      const newLeaf: Leaf = {name: newTitle, file: this.selectedFile, parent: this.parent};
+      this.spinner.show()
+      this.documentsService.putDocuments(newLeaf, id).subscribe({
+        next: value => {
+          this.updateDocumentsListFromLevel(this.level)
+          this.showEditDocumentForm = false
+        }, error: error => {
+          console.error(error);
+          this.spinner.hide();
+          this.toastr.error('Nie udało się edytować dokumentu', 'Błąd')
+        }
+      })
+    }
+  }
 
-toggleEditFolderForm(Document
-:
-Document
-)
-{
-  this.showEditListForm = !this.showEditListForm;
-  this.editListForm.reset()
-  this.editListForm.patchValue({name: Document.name})
-}
+  addNewList(item
+               :
+               Document
+  ) {
+    if (this.addListForm.valid) {
+      const newTitle: string = this.addListForm.get('name')?.value;
+      const newDocument: Leaf = {name: newTitle, parent: item.id};
+      this.spinner.show()
+      this.documentsService.postDocuments(newDocument).subscribe({
+        next: value => {
+          this.updateDocumentsListFromLevel(this.level)
+          // this.itemAdded.emit();
+          this.showAddListForm = false
+        }, error: error => {
+          console.error(error);
+          this.spinner.hide();
+          this.toastr.error('Nie udało się dodać folderu', 'Błąd')
+        }
+      });
+    }
+  }
 
-toggleAddListForm()
-{
-  this.showAddListForm = !this.showAddListForm;
-  this.addListForm.reset()
-}
+  editList(item
+             :
+             Document
+  ) {
+    if (this.editListForm.valid) {
+      const newTitle: string = this.editListForm.get('name')?.value;
+      const newDocument: Leaf = {name: newTitle, parent: this.parent};
+      this.documentsService.putDocuments(newDocument, item.id).subscribe({
+        next: value => {
+          this.spinner.show()
+          this.updateDocumentsListFromLevel(this.level)
+          // this.itemAdded.emit();
+          this.showAddListForm = false
+        },
+        error: error => {
+          console.error(error);
+          this.spinner.hide();
+          this.toastr.error('Nie udało się edytować folderu', 'Błąd')
+        }
+      });
+    }
+  }
+
+  delete(item
+           :
+           Document
+  ) {
+    this.spinner.show()
+    this.documentsService.deleteDocument(item.id).subscribe({
+      next: value => {
+        this.updateDocumentsListFromLevel(this.level)
+        // this.itemAdded.emit();
+      }, error: error => {
+        console.error(error);
+        this.spinner.hide();
+        this.toastr.error('Nie udało się usunąć', 'Błąd')
+      }
+    });
+  }
+
+  toggleAddDocumentForm() {
+    this.showAddDocumentForm = !this.showAddDocumentForm;
+    this.addFileForm.reset()
+  }
+
+  toggleEditDocumentForm(Document
+                           :
+                           Document
+  ) {
+    this.showEditDocumentForm = !this.showEditDocumentForm;
+    this.addFileForm.reset()
+    this.editFileForm.reset()
+    this.editFileForm.patchValue({name: Document.name})
+    this.selectedFile = null
+  }
+
+  toggleEditFolderForm(Document
+                         :
+                         Document
+  ) {
+    this.showEditListForm = !this.showEditListForm;
+    this.editListForm.reset()
+    this.editListForm.patchValue({name: Document.name})
+  }
+
+  toggleAddListForm() {
+    this.showAddListForm = !this.showAddListForm;
+    this.addListForm.reset()
+  }
 
 // onFileSelected(event: any) {
 //   this.selectedFile = event.target.files[0];
 // }
 
-onFileSelected(event
-:
-Event
-)
-{
-  const fileInput = event.target as HTMLInputElement;
-  const selectedFile = fileInput.files?.[0];
+  onFileSelected(event
+                   :
+                   Event
+  ) {
+    const fileInput = event.target as HTMLInputElement;
+    const selectedFile = fileInput.files?.[0];
 
-  if (selectedFile) {
-    if (selectedFile.size > this.maxFileSize_MB * 1024 * 1024) { // Limit 50MB w bajtach
-      // Twój kod obsługi błędu, np. wyświetlenie komunikatu o błędzie
-      console.log(`Plik jest zbyt duży. Wybierz plik mniejszy niż ${this.maxFileSize_MB}MB.`);
-      fileInput.value = ''; // Wyczyszczenie pola wyboru pliku
-      this.selectedFile = null;
-      this.toastr.error(`Plik jest zbyt duży. Wybierz plik mniejszy niż ${this.maxFileSize_MB}MB.`, 'Błąd')
-    } else {
-      this.selectedFile = selectedFile
-    }
-  }
-}
-
-onItemAdded()
-{
-  this.itemAdded.emit();
-}
-
-updateDocumentsListFromLevel(level
-:
-number
-)
-{
-  this.documentsService.getDocuments()
-    .subscribe({
-      next: (result: Document[]) => {
-        // Aktualizacja listy od określonego poziomu
-        this.documents = this.filterDocumentsByLevel(result, level);
-        this.spinner.hide();
-      }, error: error => {
-        console.error(error);
-        this.spinner.hide();
-        this.toastr.error('Nie udało się pobrać dokumentów', 'Błąd')
+    if (selectedFile) {
+      if (selectedFile.size > this.maxFileSize_MB * 1024 * 1024) { // Limit 50MB w bajtach
+        // Twój kod obsługi błędu, np. wyświetlenie komunikatu o błędzie
+        console.log(`Plik jest zbyt duży. Wybierz plik mniejszy niż ${this.maxFileSize_MB}MB.`);
+        fileInput.value = ''; // Wyczyszczenie pola wyboru pliku
+        this.selectedFile = null;
+        this.toastr.error(`Plik jest zbyt duży. Wybierz plik mniejszy niż ${this.maxFileSize_MB}MB.`, 'Błąd')
+      } else {
+        this.selectedFile = selectedFile
       }
-    });
-}
-
-filterDocumentsByLevel(documents
-:
-Document[], level
-:
-number
-):
-Document[]
-{
-  if (level <= 1) {
-    return documents;
-  }
-
-  let filteredDocuments: Document[] = [];
-
-  for (const doc of documents) {
-    if (doc.items && doc.items.length > 0) {
-      // Rekurencyjnie filtruj dokumenty od następnego poziomu
-      const filteredChildren = this.filterDocumentsByLevel(doc.items, level - 1);
-      filteredDocuments = filteredDocuments.concat(filteredChildren);
     }
   }
 
-  return filteredDocuments;
-}
+  onItemAdded() {
+    this.itemAdded.emit();
+  }
+
+  updateDocumentsListFromLevel(level
+                                 :
+                                 number
+  ) {
+    this.documentsService.getDocuments()
+      .subscribe({
+        next: (result: Document[]) => {
+          // Aktualizacja listy od określonego poziomu
+          this.documents = this.filterDocumentsByLevel(result, level);
+          this.spinner.hide();
+        }, error: error => {
+          console.error(error);
+          this.spinner.hide();
+          this.toastr.error('Nie udało się pobrać dokumentów', 'Błąd')
+        }
+      });
+  }
+
+  filterDocumentsByLevel(documents
+                           :
+                           Document[], level
+                           :
+                           number
+  ):
+    Document[] {
+    if (level <= 1) {
+      return documents;
+    }
+
+    let filteredDocuments: Document[] = [];
+
+    for (const doc of documents) {
+      if (doc.items && doc.items.length > 0) {
+        // Rekurencyjnie filtruj dokumenty od następnego poziomu
+        const filteredChildren = this.filterDocumentsByLevel(doc.items, level - 1);
+        filteredDocuments = filteredDocuments.concat(filteredChildren);
+      }
+    }
+
+    return filteredDocuments;
+  }
 }
 
