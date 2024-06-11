@@ -12,3 +12,4 @@ beautifulsoup4==4.12.2
 django-dump-load-utf8==0.0.4
 confluent-kafka==2.4.0
 websockets==12.0
+pycryptodome==3.20.0
