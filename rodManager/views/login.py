@@ -27,10 +27,9 @@ class CustomLogin(TokenObtainPairView):
 
     )
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)  # Sprawdzenie poprawności danych logowania
         if response.status_code == 200:
-
-            timeRequest = 15
+            time_request = 15
             user = Account.objects.get(email=request.data.get("email"))
 
             TwoStepLogin.objects.filter(user=user).delete()
@@ -38,11 +37,10 @@ class CustomLogin(TokenObtainPairView):
             token = uuid.uuid4()
             request = TwoStepLogin.objects.create(
                 user=user,
-                valid_until=timezone.now() + timedelta(minutes=timeRequest),
+                valid_until=timezone.now() + timedelta(minutes=time_request),
                 token=token,
             )
             request.save()
-
 
             send_mail_from_template(
                 "second_login",
@@ -52,7 +50,7 @@ class CustomLogin(TokenObtainPairView):
                 ],
                 {
                     "code": str(request.token),
-                    "time": str(timeRequest)
+                    "time": str(time_request)
                 },
             )
             return HttpResponse(status=200)

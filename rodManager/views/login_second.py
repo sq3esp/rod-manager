@@ -1,5 +1,3 @@
-
-
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -79,8 +77,8 @@ class CustomLogin2(TokenObtainPairView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        twoStep = TwoStepLogin.objects.get(token=request.data.get("code"))
-        if (twoStep.user.email == request.data.get("email")):
+        two_step = TwoStepLogin.objects.get(token=request.data.get("code"))
+        if two_step.user.email == request.data.get("email"):
             response = super().post(request, *args, **kwargs)
             roles = Account.objects.get(email=request.data["email"]).groups
             response.data["roles"] = [role.name for role in roles.all()]

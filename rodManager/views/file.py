@@ -7,8 +7,8 @@ from django.views import View
 class FileView(View):
     def get(self, request, file_path):
         try:
-            if 'roddocuments' not in file_path:
-                return HttpResponse(status=400, content="Invalid file path.")
+            if 'roddocuments' not in file_path and 'images' not in file_path:
+                return HttpResponse("Invalid file path.", status=400)
             response = HttpResponse()
             response["X-Accel-Redirect"] = f"/media/{quote(file_path)}"
             response["Content-Type"] = ""
