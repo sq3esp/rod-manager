@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from rodManager.dir_models.account import Account
 from rodManager.dir_models.userdocument import UserDocument
+from rodManager.users.validate import permission_required
 
 
 class UserDocumentPostSerializer(serializers.Serializer):
@@ -40,6 +41,7 @@ class UserDocumentView(APIView):
         summary="Get user documents",
         description='Dostarczone dokumenty będą w poniższym formacje. Jeśli dokument jest folderem i posiada wewnątrz pliki, to w polu `items` będą zawarte dokumenty w nim zawarte. Jeśli dokument jest plikiem, to w polu `file_url` będzie zawarty link do pliku. \nPrzykład: \n```json\n[{\n"user": 1,\n"documents":[{\n    "id": 1,\n    "name": "folder",\n    "items": [{\n        "id": 2,\n        "name": "plik",\n        "file_url": "/mediafiles/userdocuments/plik.txt"\n    }]\n  }]\n}\n{\n"user": 2,\n"documents":[{\n    "id": 3,\n    "name": "folder2",\n    "items": [{\n        "id": 4,\n        "name": "plik2",\n        "file_url": "/mediafiles/userdocuments/plik2.txt"\n    }]\n  }]\n}]\n``` \n\n\nJeżeli folder jest pusty może zostać przekonwertowany na plik przez przesłanie pliku.\nW folderze może istnieć inny folder, struktura może być dowolnie zagnieżdżona.\nPrzykład zagnieżdżenia: \n```json\n...\n[{\n    "id": 1,\n    "name": "folder",\n    "items": [{\n        "id": 2,\n        "name": "plik",\n        "file_url": "/mediafiles/userdocuments/plik.txt"\n    }, {\n        "id": 3,\n        "name": "folder2",\n        "items": [{\n            "id": 4,\n            "name": "plik2",\n            "file_url": "/mediafiles/userdocuments/plik2.txt"\n        }]\n    }]\n}]\n...\n```',
     )
+    @permission_required("rodManager.view_userdocument")
     def get(self, request):
         result = []
         for user in Account.objects.all():
@@ -54,6 +56,7 @@ class UserDocumentView(APIView):
         request=UserDocumentPostSerializer,
         responses={201: UserDocumentSerializer},
     )
+    @permission_required("rodManager.add_userdocument")
     def post(self, request):
         serializer = UserDocumentPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

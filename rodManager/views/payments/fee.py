@@ -85,7 +85,7 @@ class FeeView(APIView):
         request=AddFeeSerializer,
         responses=FeeSerializer(),
     )
-    @permission_required()
+    @permission_required("rodManager.add_fee")
     def post(self, request):
         serializer = AddFeeSerializer(data=request.data)
         if serializer.is_valid():

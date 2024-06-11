@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from rodManager.dir_models.garden import Garden
+from rodManager.users.validate import permission_required
 
 
 @swagger_auto_schema(
@@ -23,12 +24,10 @@ from rodManager.dir_models.garden import Garden
     ),
 )
 @api_view(["GET"])
+@permission_required("rodManager.view_garden")
 def profile_from_garden(request):
-    if  request.user.is_authenticated:
-        if Garden.objects.filter(id=request.data["id"]).exists():
-            garden = Garden.objects.get(id=request.data["id"])
-            return Response(garden)
-        else:
-            return Response({"error": "Garden doesn't exist."})
+    if Garden.objects.filter(id=request.data["id"]).exists():
+        garden = Garden.objects.get(id=request.data["id"])
+        return Response(garden)
     else:
-        return Response({"error": "You don't have permission to view gardens."})
+        return Response({"error": "Garden doesn't exist."})

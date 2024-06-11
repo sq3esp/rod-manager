@@ -5,6 +5,7 @@ from django.core import serializers
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import status
+from rodManager.users.validate import permission_required
 
 
 @api_view(['GET'])
@@ -31,9 +32,8 @@ from rest_framework import status
         ),
     },
 )
+@permission_required("rodManager.view_garden")
 def garden_list(request):
-    if not request.user.is_authenticated:
-        return Response({"error": "You don't have permission to view gardens."}, status=status.HTTP_403_FORBIDDEN)
     gardens = Garden.objects.all()
     
     return Response(serializers.serialize("json", gardens))
@@ -51,8 +51,6 @@ def garden_list(request):
     ),
     
 )
+@permission_required("rodManager.view_garden")
 def garden_count(request):
-    if request.user.is_authenticated:
-        return Response({"count": Garden.objects.count()})
-    else:
-        return Response({"error": "You don't have permission to view gardens."})
+    return Response({"count": Garden.objects.count()})

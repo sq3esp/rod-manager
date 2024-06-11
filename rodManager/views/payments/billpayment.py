@@ -59,7 +59,7 @@ class BillPaymentView(APIView):
         request=AddBillPaymentSerializer,
         responses=PaymentSerializer(),
     )
-    @permission_required()
+    @permission_required("rodManager.add_billingperiod")
     def post(self, request):
         serializer = AddBillPaymentSerializer(data=request.data)
         if serializer.is_valid():

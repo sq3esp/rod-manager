@@ -17,6 +17,7 @@ from rodManager.dir_models.record import (
     RecordsValuesSerializer,
 )
 from rodManager.libs.rodpagitation import RODPagination
+from rodManager.users.validate import permission_required
 
 
 class RecordsCRUD(APIView):
@@ -42,6 +43,7 @@ class RecordsCRUD(APIView):
             ),
         },
     )
+    @permission_required("rodManager.view_record")
     def get(self, request):
         paginator = RODPagination()
         if request.user.is_authenticated:
@@ -65,6 +67,7 @@ class RecordsCRUD(APIView):
             ),
         },
     )
+    @permission_required("rodManager.add_record")
     def post(self, request):
         if request.user.is_authenticated:
             if request.data["value"] < 0:
@@ -100,6 +103,7 @@ class RecordsCRUD(APIView):
             ),
         },
     )
+    @permission_required("rodManager.delete_record")
     def delete(self, request, id):
         if request.user.is_authenticated:
             try:

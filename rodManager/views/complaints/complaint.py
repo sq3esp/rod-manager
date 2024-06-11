@@ -51,7 +51,7 @@ class ComplaintView(APIView):
         ],
         responses=ComplaintSerializer(many=True),
     )
-    @permission_required()
+    @permission_required("rodManager.view_complaint")
     def get(self, request):
         state = self.request.query_params.get("state", None)
         if state:
@@ -102,7 +102,7 @@ class ComplaintView(APIView):
         request=AddComplaintSerializer,
         responses=ComplaintSerializer,
     )
-    @permission_required()
+    @permission_required("rodManager.add_complaint")
     def post(self, request):
         serializer = AddComplaintSerializer(data=request.data)
         if serializer.is_valid():

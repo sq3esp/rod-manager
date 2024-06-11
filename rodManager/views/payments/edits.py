@@ -7,6 +7,7 @@ from drf_spectacular.utils import (
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rodManager.users.validate import permission_required
 
 
 class FeeSerializer(serializers.Serializer):
@@ -39,6 +40,7 @@ class LeaseFeeView(APIView):
             500: OpenApiResponse(description="Server error occurred."),
         },
     )
+    @permission_required("rodManager.change_leasefee")
     def patch(self, request):
         try:
             paymentsData.payments["leaseFees"] = request.data

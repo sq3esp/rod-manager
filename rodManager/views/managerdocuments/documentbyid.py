@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rodManager.dir_models.managerdocument import ManagerDocument
+from rodManager.users.validate import permission_required
 
 
 class UpdateManagerDocumentSerializer(serializers.Serializer):
@@ -42,6 +43,7 @@ class ManagerDocumentByIdView(APIView):
         request=UpdateManagerDocumentSerializer,
         responses={200: ManagerDocumentByIdSerializer},
     )
+    @permission_required("rodManager.change_managerdocument")
     def put(self, request, document_id):
         document = ManagerDocument.objects.get(pk=document_id)
         serializer = UpdateManagerDocumentSerializer(document, data=request.data)
@@ -54,6 +56,7 @@ class ManagerDocumentByIdView(APIView):
         description="Delete manager document by id.",
         responses={204: None},
     )
+    @permission_required("rodManager.delete_managerdocument")
     def delete(self, request, document_id):
         document = ManagerDocument.objects.get(pk=document_id)
         if document.file:

@@ -44,7 +44,7 @@ class NewNotificationView(APIView):
             ),
         },
     )
-    @permission_required()
+    @permission_required("rodManager.view_notification")
     def get(self, request):
         new_messages_count = Notification.objects.filter(
             user=request.user, is_read=False

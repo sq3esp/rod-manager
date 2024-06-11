@@ -12,6 +12,7 @@ class RodDocumentByIdView(APIView):
         description="Delete system document by id.",
         responses={204: None},
     )
+    @permission_required("rodManager.delete_roddocument")
     def delete(self, request, document_id):
         document = RodDocument.objects.get(pk=document_id)
         document.delete()

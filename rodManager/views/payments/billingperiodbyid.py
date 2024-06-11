@@ -54,7 +54,7 @@ class BillingPeriodByIdView(APIView):
         request=AddBillingPeriodSerializer,
         responses=BillingPeriodSerializer,
     )
-    # @permission_required()
+    @permission_required("rodManager.change_billingperiod")
     def patch(self, request, billing_period_id):
         billingperiod = BillingPeriod.objects.get(pk=billing_period_id)
         serializer = AddBillingPeriodSerializer(

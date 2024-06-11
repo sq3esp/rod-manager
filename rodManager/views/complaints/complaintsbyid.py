@@ -25,7 +25,7 @@ class ComplaintsById(APIView):
         description="Get complaints in the system by id.",
         responses=ComplaintSerializer,
     )
-    @permission_required()
+    @permission_required("rodManager.view_complaint")
     def get(self, request, complaint_id):
         user = None
         if (

@@ -13,6 +13,7 @@ class VotedPolls(APIView):
         description="Get currents polls.",
         responses={200: PollSerializer(many=True)},
     )
+    @permission_required("rodManager.view_poll")
     def get(self, request):
         polls = Poll.objects.filter(
             end_date__gte=datetime.now(), options__votes__user=request.user

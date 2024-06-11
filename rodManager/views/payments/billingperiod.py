@@ -82,7 +82,6 @@ class BillingPeriodView(APIView):
         ],
         responses=BillingPeriodSerializer(many=True),
     )
-    # @permission_required()
     def get(self, request):
         billingperiod = BillingPeriod.objects.all().order_by("start_date")
         paginator = RODPagination()
@@ -96,7 +95,7 @@ class BillingPeriodView(APIView):
         request=AddBillingPeriodSerializer,
         responses=BillingPeriodSerializer,
     )
-    # @permission_required()
+    @permission_required("rodManager.add_billingperiod")
     def post(self, request):
         serializer = AddBillingPeriodSerializer(data=request.data)
         if serializer.is_valid():

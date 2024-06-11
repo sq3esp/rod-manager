@@ -66,7 +66,7 @@ class NotificationView(APIView):
         ],
         responses=NotificationSerializer(many=True),
     )
-    @permission_required()
+    @permission_required("rodManager.view_notification")
     def get(self, request):
         paginator = RODPagination()
         if request.GET.get("only_unread") == "true":
@@ -91,7 +91,7 @@ class NotificationView(APIView):
         request=AddNotificationSerializer,
         responses=NotificationSerializer(),
     )
-    @permission_required()
+    @permission_required("rodManager.add_notification")
     def post(self, request):
         serializer = AddNotificationSerializer(data=request.data)
         if serializer.is_valid():

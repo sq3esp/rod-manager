@@ -11,6 +11,7 @@ from rodManager.dir_models.billingperiod import BillingPeriod
 from rodManager.dir_models.fee import Fee, FeeCalculationType, FeeFeeType
 from rodManager.dir_models.garden import Garden
 from rodManager.dir_models.payment import Payment, PaymentType
+from rodManager.users.validate import permission_required
 
 
 class MyGardenAPI(APIView):
@@ -109,6 +110,7 @@ class MyGardenAPI(APIView):
             ),
         },
     )
+    @permission_required("rodManager.view_garden")
     def get(self, request):
         garden = None
         try:

@@ -235,6 +235,7 @@ class AnnouncementView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
     
+    @permission_required("rodManager.delete_announcement")
     def delete(self, request):
         if request.data.get("id"):
             announcement = Announcement.objects.filter(id=request.data["id"]).first()

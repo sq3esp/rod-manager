@@ -7,6 +7,7 @@ from rest_framework import status
 from django.core import serializers
 
 from rodManager.libs.rodpagitation import RODPagination
+from rodManager.users.validate import permission_required
 
 
 
@@ -26,14 +27,12 @@ response= openapi.Response(
 )
 )
 @api_view(['GET'])
+@permission_required("rodManager.view_garden")
 def garden_in_bulk(request):
     paginator = RODPagination()
-    if  request.user.is_authenticated:
-        gardens = paginator.paginate_queryset(Garden.objects.all().order_by("id"), request)
-        return paginator.get_paginated_response(serializers.serialize("json", gardens))
-    else:
-        return Response({"error": "You don't have permission to view gardens."}, status=status.HTTP_403_FORBIDDEN)
-                                  
+    gardens = paginator.paginate_queryset(Garden.objects.all().order_by("id"), request)
+    return paginator.get_paginated_response(serializers.serialize("json", gardens))
+                                
  
 @swagger_auto_schema(
     methods=["GET"],
@@ -58,12 +57,10 @@ def garden_in_bulk(request):
     },
 )
 @api_view(['GET'])      
+@permission_required("rodManager.view_garden")
 def garden_by_id(request):
-    if request.user.is_authenticated:
-        if Garden.objects.filter(id=request.data["id"]).exists():
-            garden = Garden.objects.get(id=request.GET["id"], )
-            return Response(garden, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Garden doesn't exist."}, status=status.HTTP_404_NOT_FOUND)
+    if Garden.objects.filter(id=request.data["id"]).exists():
+        garden = Garden.objects.get(id=request.GET["id"], )
+        return Response(garden, status=status.HTTP_200_OK)
     else:
-        return Response({"error": "You don't have permission to view gardens."}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": "Garden doesn't exist."}, status=status.HTTP_404_NOT_FOUND)

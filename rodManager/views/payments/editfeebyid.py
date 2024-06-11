@@ -80,6 +80,7 @@ class EditFeeByIdView(APIView):
         request=AddFeeSerializer,
         responses=FeeSerializer(),
     )
+    @permission_required("rodManager.change_fee")
     def patch(self, request, fee_id):
         fee = Fee.objects.get(id=fee_id)
         serializer = AddFeeSerializer(fee, data=request.data, partial=True)

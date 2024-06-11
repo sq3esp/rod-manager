@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rodManager.dir_models.poll import Option, Poll, PollSerializer, Vote
+from rodManager.users.validate import permission_required
 
 
 class CurrentsPolls(APIView):
@@ -13,6 +14,7 @@ class CurrentsPolls(APIView):
         description="Get currents polls.",
         responses={200: PollSerializer(many=True)},
     )
+    @permission_required("rodManager.view_poll")
     def get(self, request):
         polls = Poll.objects.filter(end_date__gte=datetime.now()).exclude(
             options__votes__user=request.user

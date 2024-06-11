@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rodManager.dir_models.account import Account
 from rodManager.dir_models.userdocument import UserDocument
 
+from rodManager.users.validate import permission_required
 
 class UpdateUserDocumentSerializer(serializers.Serializer):
     user = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
@@ -45,6 +46,7 @@ class UserDocumentByIdView(APIView):
         description="Put user document by id.",
         request=UpdateUserDocumentSerializer,
     )
+        @permission_required("rodManager.change_roddocument")
     def put(self, request, document_id):
         document = UserDocument.objects.get(pk=document_id)
         serializer = UpdateUserDocumentSerializer(document, data=request.data)
@@ -57,6 +59,7 @@ class UserDocumentByIdView(APIView):
         description="Delete user document by id.",
         responses={204: None},
     )
+    @permission_required("rodManager.delete_roddocument")
     def delete(self, request, document_id):
         document = get_object_or_404(UserDocument, pk=document_id)
         if document.file:

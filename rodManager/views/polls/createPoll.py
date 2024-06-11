@@ -10,6 +10,7 @@ from drf_spectacular.utils import (
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rodManager.users.validate import permission_required
 
 from rodManager.dir_models.poll import (
     Option,
@@ -59,6 +60,7 @@ class CreatePoll(APIView):
         request=AddVotingSerializer,
         responses={201: PollSerializer},
     )
+    @permission_required("rodManager.add_poll")
     def post(self, request):
         # Trzeba tutaj uważać na date bo podaje razem ze strefą czasową
         # iso_date = request.data['finishDate']

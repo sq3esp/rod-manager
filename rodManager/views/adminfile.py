@@ -2,9 +2,11 @@ from urllib.parse import quote
 
 from django.http import HttpResponse
 from rest_framework.views import APIView
+from rodManager.users.validate import permission_required
 
 
 class AdminFileView(APIView):
+    @permission_required("rodManager.view_managerdocument")
     def get(self, request, file_path):
         try:
             if 'managerdocuments' not in file_path:

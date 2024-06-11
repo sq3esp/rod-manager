@@ -2,6 +2,7 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rodManager.users.validate import permission_required
 
 from rodManager.dir_models.complaint import (
     Complaint,
@@ -51,6 +52,7 @@ class MessageView(APIView):
         request=AddMessageSerializer,
         responses=MessageSerializer,
     )
+    @permission_required("rodManager.add_message")
     def post(self, request):
         serializer = AddMessageSerializer(data=request.data)
         if serializer.is_valid():

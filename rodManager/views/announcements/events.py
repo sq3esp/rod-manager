@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rodManager.dir_models.event import Event
+from rodManager.users.validate import permission_required
 
 
 class EventView(APIView):

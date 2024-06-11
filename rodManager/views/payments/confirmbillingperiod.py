@@ -261,8 +261,7 @@ class ConfirmBillingPeriodView(APIView):
         responses=BillingPeriodSerializer,
     )
 
-    # @permission_required()
-
+    @permission_required("rodManager.add_billingperiod")
     def post(self, request, billing_period_id):
         if billing_period_id is None:
             return Response(

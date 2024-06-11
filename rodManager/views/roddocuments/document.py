@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rodManager.dir_models.roddocument import RodDocument
+from rodManager.users.validate import permission_required
 
 
 class RodDocumentPostSerializer(serializers.Serializer):
@@ -37,6 +38,7 @@ class RodDocumentView(APIView):
         description="Get system documents.",
         responses=RodDocumentSerializer(many=True),
     )
+    @permission_required("rodManager.view_roddocument")
     def get(self, request):
         documents = RodDocument.objects.all()
         serializer = RodDocumentSerializer(documents, many=True)
@@ -48,6 +50,7 @@ class RodDocumentView(APIView):
         request=RodDocumentPostSerializer,
         responses={201: RodDocumentSerializer},
     )
+    @permission_required("rodManager.add_roddocument")
     def post(self, request):
         serializer = RodDocumentPostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

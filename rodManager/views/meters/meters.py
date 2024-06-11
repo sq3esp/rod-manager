@@ -14,6 +14,7 @@ from rodManager.dir_models.meter import Meter, MeterLastRecordSerializer
 from rodManager.dir_models.record import Record, RecordSerializer
 from rodManager.dir_models.garden import Garden
 import datetime
+from rodManager.users.validate import permission_required
 
 
 class MetersCRUD(APIView):
@@ -38,6 +39,7 @@ class MetersCRUD(APIView):
     }
     
     )
+    @permission_required("rodManager.view_meter")
     def get(self, request):
         paginator = RODPagination()
         
@@ -92,35 +94,33 @@ class MetersCRUD(APIView):
         ),
     }
     )
+    @permission_required("rodManager.add_meter")
     def post(self, request):
-        if request.user.is_authenticated:
-            if not request.data.get("serial") or not request.data.get("type"):
-                return Response({"error": "Serial and type are required."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            if Meter.objects.filter(serial=request.data["serial"]).exists():
-                return Response({"error": "Meter already exists."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            newmeter = Meter.objects.create(
-                serial=request.data["serial"],
-                type=request.data["type"],
+        if not request.data.get("serial") or not request.data.get("type"):
+            return Response({"error": "Serial and type are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if Meter.objects.filter(serial=request.data["serial"]).exists():
+            return Response({"error": "Meter already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        newmeter = Meter.objects.create(
+            serial=request.data["serial"],
+            type=request.data["type"],
+        )
+        if request.data.get("adress"):
+            newmeter.adress = request.data["adress"]
+        if request.data.get("garden"):
+            if not Garden.objects.filter(id=request.data["garden"]).exists():
+                return Response({"error": "Garden does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            newmeter.garden = Garden.objects.get(id=request.data["garden"])
+        if request.data.get("value"):
+            Record.objects.create(
+                meter=newmeter,
+                value=request.data["value"],
+                datetime = datetime.datetime.now()
             )
-            if request.data.get("adress"):
-                newmeter.adress = request.data["adress"]
-            if request.data.get("garden"):
-                if not Garden.objects.filter(id=request.data["garden"]).exists():
-                    return Response({"error": "Garden does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-                newmeter.garden = Garden.objects.get(id=request.data["garden"])
-            if request.data.get("value"):
-                Record.objects.create(
-                    meter=newmeter,
-                    value=request.data["value"],
-                    datetime = datetime.datetime.now()
-                )
-            newmeter.save()
-            return Response({"message": "Meter created."}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"error": "You don't have permission to create meters."}, status=status.HTTP_403_FORBIDDEN)
-    
+        newmeter.save()
+        return Response({"message": "Meter created."}, status=status.HTTP_201_CREATED)
+
     
     @extend_schema(
     summary="Delete meter",
@@ -139,15 +139,13 @@ class MetersCRUD(APIView):
         ),
     }
     )
+    @permission_required("rodManager.delete_meter")
     def delete(self, request):
-        if request.user.is_authenticated:
-            if not request.data.get("serial"):
-                return Response({"error": "Serial is required."}, status=status.HTTP_400_BAD_REQUEST)
-            if not Meter.objects.filter(serial=request.data["serial"]).exists():
-                return Response({"error": "Meter does not exist."}, status=status.HTTP_400_BAD_REQUEST)
-            Meter.objects.get(serial=request.data["serial"]).delete()
-            return Response({"message": "Meter deleted."}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "You don't have permission to delete meters."}, status=status.HTTP_403_FORBIDDEN)
-        
+        if not request.data.get("serial"):
+            return Response({"error": "Serial is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not Meter.objects.filter(serial=request.data["serial"]).exists():
+            return Response({"error": "Meter does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+        Meter.objects.get(serial=request.data["serial"]).delete()
+        return Response({"message": "Meter deleted."}, status=status.HTTP_200_OK)
+    
 

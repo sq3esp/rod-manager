@@ -71,7 +71,7 @@ class FeeByIdView(APIView):
             )
         ],
     )
-    @permission_required()
+    @permission_required("rodManager.view_fee")
     def get(self, request, billing_period_id):
         billing_period = BillingPeriod.objects.get(id=billing_period_id)
         leaseFees = Fee.objects.filter(

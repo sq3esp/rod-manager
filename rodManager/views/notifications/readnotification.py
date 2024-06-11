@@ -30,7 +30,7 @@ class ReadNotificationView(APIView):
         description="Mark notification as read.",
         responses=NotificationSerializer(),
     )
-    @permission_required()
+    @permission_required("rodManager.change_notification")
     def post(self, request, notification_id):
         notification = Notification.objects.get(id=notification_id)
         if notification is None:

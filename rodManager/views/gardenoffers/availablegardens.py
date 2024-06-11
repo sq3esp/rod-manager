@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rodManager.dir_models.garden import Garden
 
 from django.db.models import Q
+from rodManager.users.validate import permission_required
 
 
 class AvailableGardensView(APIView):
@@ -36,7 +37,6 @@ class AvailableGardensView(APIView):
         },
     )
     def get(self, request):
-
         gardens = Garden.objects.filter(Q(status__icontains="dostępna") | Q(status__icontains="dostepna"))
 
         return Response(

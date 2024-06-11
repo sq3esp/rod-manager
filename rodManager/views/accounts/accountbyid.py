@@ -61,7 +61,7 @@ class AccountByIdView(APIView):
             ),
         },
     )
-    @permission_required()
+    @permission_required("rodManager.view_account")
     def get(self, request, account_id):
         try:
             account = Account.objects.get(id=account_id)
@@ -115,7 +115,7 @@ class AccountByIdView(APIView):
             ),
         },
     )
-    @permission_required()
+    @permission_required("rodManager.change_account")
     def patch(self, request, account_id):
         try:
             account = Account.objects.get(id=account_id)
