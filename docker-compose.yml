@@ -31,6 +31,7 @@ services:
       - ./ca/certs/:/certs/
       - ./mediafiles:/home/app/web/mediafiles
       - media_volume:/home/app/web/mediafiles
+    command: sh -c "chmod 700 /home/app/web/mediafiles && chown nginx:nginx /home/app/web/mediafiles && nginx -g 'daemon off;'"
     ports:
       - 443:443
       - 80:80
