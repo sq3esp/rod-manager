@@ -188,7 +188,7 @@ class AnnouncementView(APIView):
                                 filename, ContentFile(image_data), save=True
                             )
 
-                            img_tag["src"] = f"/api/protectedfile/images/{filename}"
+                            img_tag["src"] = f"/api/file/images/{filename}"
                             break
 
                 updated_html_code = str(soup)

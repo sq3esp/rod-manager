@@ -70,6 +70,7 @@ export class LoginComponent implements OnInit{
     this.spinner.show();
     this.authService.login(user).subscribe({
       next: data => {
+        this.toastr.info('Wysłano kod na adres email', 'Info')
         this.showSecondDialog(user.email,user.password)
         this.spinner.hide();
       },
