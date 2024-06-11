@@ -32,9 +32,11 @@ class KafkaConnectorConsumer:
                 else:
                     # Error
                     logging.error(f"Error occurred: {msg.error().str()}")
-            received_data = json.loads(msg.value().decode("utf-8"))
-            logging.info(f"Received: {received_data}")
-
+            try:
+                received_data = json.loads(msg.value().decode("utf-8"))
+                logging.info(f"Received: {received_data}")
+            except json.decoder.JSONDecodeError:
+                logging.error("Failed to decode valid json message")
 
     def close_consumer(self):
         self.consumer.close()
