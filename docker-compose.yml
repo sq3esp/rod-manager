@@ -3,11 +3,13 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: python manage.py runserver_plus --cert-file /certs/cert.pem --key-file /certs/key.pem 0.0.0.0:8000
+    command: python manage.py runserver_plus --cert-file server.cert.pem --key-file server.key.pem 0.0.0.0:8000
     ports:
       - 8000:8000
     volumes:
       - ./:/usr/src/
+      - ./ca/certs/:/certs/
+      - cert_volume:/certs
     env_file:
       - ./.env.dev
   db:
@@ -25,20 +27,25 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     volumes:
+      - ./ca/certs/:/certs/
       - ./mediafiles:/home/app/web/mediafiles
     ports:
-      - 1337:1337
+      - 443:443
+      - 80:80
     depends_on:
       - web
   angular-app:
     build:
       context: ./rod-manager-ui
       dockerfile: Dockerfile
+    volumes:
+      - ./ca/certs/:/certs/
     ports:
-      - "4200:80" # Expose port 4200 (or any other port you wish to use)
+      - "4200:443" # Expose port 4200 (or any other port you wish to use)
     depends_on:
       - web # Replace with the name of your Django service
 
 volumes:
   postgres_data:
   media_volume:
+  cert_volume:

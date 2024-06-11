@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  ca:
+    build: ./
+    command: bash -c "cp /certs_private/certs/ca.cert.pem /certs/ca.crt && cp /certs_private/certs/server.cert.pem /certs/server.cert.pem && cp /certs_private/private/server.key.pem /certs/server.key.pem"
+    volumes:
+      #- certs_volume:/certs_private
+      - ./certs:/certs
+#    env_file:
+#      - ./.env.dev
+volumes:
+  certs_volume:
