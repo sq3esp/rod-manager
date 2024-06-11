@@ -13,10 +13,8 @@ class AdminFileView(APIView):
             if not request.user.groups.filter(name__in=["MANAGER", "ADMIN"]).exists():
                 return HttpResponse(status=403, content="You don't have permission to access this file.")
 
-            # Utwórz URL przekierowania
             redirect_url = f"/media/{quote(file_path)}"
 
-            # Utwórz odpowiedź przekierowującą do pliku
             response = HttpResponse()
             response["X-Accel-Redirect"] = redirect_url
             response["Content-Type"] = "application/octet-stream"
