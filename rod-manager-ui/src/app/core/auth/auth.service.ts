@@ -43,6 +43,23 @@ export class AuthService {
     );
   }
 
+  loginSecond(user1: LoginUser,code:String): Observable<AuthResponse> {
+    let emailTemp = user1.email
+    let passwordTemp = user1.password
+
+    let body = {
+      email:emailTemp,
+      password:passwordTemp,
+      code:code
+    }
+    return this.httpClient.post<AuthResponse>(API_ENDPOINTS.public.loginSecond, body).pipe(
+      tap(value => {
+        this.storageService.setLoggedIn(true);
+        this.topAppBarService.startInterval.next(true);
+      })
+    );
+  }
+
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.storageService.getRefreshToken();
     console.log('Refresh token in auth:' + refreshToken)

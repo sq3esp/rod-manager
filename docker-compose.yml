@@ -10,6 +10,7 @@ services:
       - ./:/usr/src/
       - ./ca/certs/:/certs/
       - cert_volume:/certs
+      - media_volume:/media
     env_file:
       - ./.env.dev
   db:
@@ -29,6 +30,7 @@ services:
     volumes:
       - ./ca/certs/:/certs/
       - ./mediafiles:/home/app/web/mediafiles
+      - media_volume:/home/app/web/mediafiles
     ports:
       - 443:443
       - 80:80

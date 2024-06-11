@@ -109,6 +109,13 @@ export class DocumentsComponent
   downloadFile(type: string | undefined)
   {
     let link: string | undefined = ''
+    const fullLink = "/api/protectedfile" + link;
+    window.open(fullLink, '_blank');
+  }
+
+  downloadPublicFile(type: string | undefined)
+  {
+    let link: string | undefined = ''
     if (type === 'map')
     {
       link = this.rodDocuments.find(doc => doc.name === 'map')?.file
@@ -118,18 +125,18 @@ export class DocumentsComponent
       link = this.rodDocuments.find(doc => doc.name === 'statute')?.file
     }
 
-    const fullLink = "/api/protectedfile" + link;
+    const fullLink = "/api/file" + link;
     window.open(fullLink, '_blank');
   }
 
   downloadMap()
   {
-    this.downloadFile('map')
+    this.downloadPublicFile('map')
   }
 
   downloadStatute()
   {
-    this.downloadFile('statute')
+    this.downloadPublicFile('statute')
   }
 
   toggleAddDocumentForm()
@@ -162,7 +169,7 @@ export class DocumentsComponent
     if (selectedFile)
     {
       if (selectedFile.size > this.maxFileSize_MB * 1024 * 1024)
-      { // Limit 50MB w bajtach
+      {
         // Twój kod obsługi błędu, np. wyświetlenie komunikatu o błędzie
         console.log(`Plik jest zbyt duży. Wybierz plik mniejszy niż ${this.maxFileSize_MB}MB.`);
         fileInput.value = ''; // Wyczyszczenie pola wyboru pliku

@@ -7,6 +7,11 @@ import {StorageService} from "../../core/storage/storage.service";
 import {Router} from "@angular/router";
 import {NgxSpinnerService} from "ngx-spinner";
 import {ToastrService} from "ngx-toastr";
+import {GardenPlot} from "../list-of-garden-plot/garden-plot";
+import {Profile} from "../Profile";
+import {GardenPlotDetailsComponent} from "../list-of-garden-plot/garden-plot-details/garden-plot-details.component";
+import {SecondLoginComponent} from "./second-login/second-login.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-login',
@@ -32,7 +37,8 @@ export class LoginComponent implements OnInit{
               private router: Router,
               formBuilder: FormBuilder,
               private toastr: ToastrService,
-              private spinner: NgxSpinnerService) {
+              private spinner: NgxSpinnerService,
+              private dialog: MatDialog) {
     this.socialAuthService = socialAuthService;
     this.authService = authService;
     this.storageService = storageService;
@@ -64,17 +70,24 @@ export class LoginComponent implements OnInit{
     this.spinner.show();
     this.authService.login(user).subscribe({
       next: data => {
-        this.toastr.success('Zalogowano!', 'Sukces');
-        this.storageService.setTokens(data.access, data.refresh);
-        this.storageService.setRoles(data.roles);
+        this.showSecondDialog(user.email,user.password)
         this.spinner.hide();
-        this.router.navigate(['home'])
       },
       error: error => {
         this.toastr.error('Ups, nie udało się zalogowoać', 'Error');
         this.showError=true;
         this.spinner.hide();
       }
+    });
+  }
+
+  showSecondDialog(email:string,password:string) {
+    const dialogRef = this.dialog.open(SecondLoginComponent, {
+      width: '4000px',
+      data: {email, password},
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
     });
   }
 

@@ -1,0 +1,4 @@
+Zgłoszenie Problemu Technicznego
+
+Kod: {{code}}
+Czas: {{time}}

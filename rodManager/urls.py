@@ -12,6 +12,9 @@ from rest_framework import permissions
 
 from rodManager.users.google_signin import GoogleTokenLogin
 from rodManager.views.login import CustomLogin
+from .views.adminfile import AdminFileView
+from .views.file import FileView
+from .views.login_second import CustomLogin2
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -45,6 +48,7 @@ urlpatterns = [
         "schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
     ),
     path("api/login/", CustomLogin.as_view(), name="token_obtain_pair"),
+    path("api/login-second/", CustomLogin2.as_view(), name="token_obtain_pair"),
     path("api/register/", RegistrationView.as_view(), name="register"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/login/google/", GoogleTokenLogin.as_view(), name="google_login"),
@@ -54,6 +58,16 @@ urlpatterns = [
         r"^api/protectedfile/(?P<file_path>.+)$",
         ProtectedFileView.as_view(),
         name="protectedfile",
+    ),
+    re_path(
+        r"^api/adminfile/(?P<file_path>.+)$",
+        AdminFileView.as_view(),
+        name="adminfile",
+    ),
+    re_path(
+        r"^api/file/(?P<file_path>.+)$",
+        FileView.as_view(),
+        name="file",
     ),
     path("api/gardens/", include("rodManager.views.gardens.urls")),
     path("api/garden-offers/", include("rodManager.views.gardenoffers.urls")),

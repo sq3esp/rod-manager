@@ -95,7 +95,7 @@ export class GardenInfoComponent
       link = this.rodDocuments.find(doc => doc.name === 'statute')?.file
     }
 
-    const fullLink = "/api/protectedfile" + link;
+    const fullLink = "/api/file" + link;
     window.open(fullLink, '_blank');
   }
 
