@@ -22,7 +22,6 @@ class AESCipher(object):
 
         iv_base64 = base64.b64encode(iv).decode("utf-8")
         encrypted_base64 = base64.b64encode(encrypted).decode("utf-8")
-        # print(iv_base64 + ":" + encrypted_base64)
         return iv_base64 + ":" + encrypted_base64
 
     def decrypt(self, encrypted_message):
