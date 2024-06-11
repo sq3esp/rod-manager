@@ -13,7 +13,7 @@ class KafkaConnectorProducer:
     def __init__(self, server: str) -> None:
         prod_config = {"bootstrap.servers": server, "broker.address.family": "v4"}
         self.producer = Producer(prod_config)
-        self.cipher = AESCipher(AES_KEY)
+        self.cipher = AESCipher("4C11B7884677DD4CBAA8C7CBB2685546")
 
 
     def delivery_report(self, err, msg):

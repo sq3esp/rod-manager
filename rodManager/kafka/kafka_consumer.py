@@ -48,6 +48,8 @@ class KafkaConnectorConsumer:
                 logging.info(f"Received: {msg_value_dict}")
             except json.decoder.JSONDecodeError:
                 logging.error("Failed to decode valid json message")
+            except UnicodeDecodeError:
+                logging.error("Wrong decryption")
 
     def close_consumer(self):
         self.consumer.close()
