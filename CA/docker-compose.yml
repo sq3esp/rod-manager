@@ -7,7 +7,6 @@ services:
     volumes:
       #- certs_volume:/certs_private
       - ./certs:/certs
+
 #    env_file:
 #      - ./.env.dev
-volumes:
-  certs_volume:

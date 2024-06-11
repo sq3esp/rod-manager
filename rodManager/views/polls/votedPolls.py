@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rodManager.dir_models.poll import Option, Poll, PollSerializer, Vote
+from rodManager.users.validate import permission_required
 
 
 class VotedPolls(APIView):

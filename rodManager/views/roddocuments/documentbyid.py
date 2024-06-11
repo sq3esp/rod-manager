@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from rodManager.dir_models.roddocument import RodDocument
+from rodManager.users.validate import permission_required
 
 
 class RodDocumentByIdView(APIView):

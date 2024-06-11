@@ -3,13 +3,12 @@ version: '3.8'
 services:
   web:
     build: ./
-    command: python manage.py runserver_plus --cert-file server.cert.pem --key-file server.key.pem 0.0.0.0:8000
+    command: python manage.py runserver_plus --cert-file /certs/server.cert.pem --key-file /certs/server.key.pem 0.0.0.0:8000
     ports:
       - 8000:8000
     volumes:
       - ./:/usr/src/
-      - ./ca/certs/:/certs/
-      - cert_volume:/certs
+      - ./CA/certs/:/certs/
       - media_volume:/media
     env_file:
       - ./.env.dev
@@ -51,4 +50,3 @@ services:
 volumes:
   postgres_data:
   media_volume:
-  cert_volume:

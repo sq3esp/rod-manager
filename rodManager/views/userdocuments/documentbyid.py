@@ -46,7 +46,7 @@ class UserDocumentByIdView(APIView):
         description="Put user document by id.",
         request=UpdateUserDocumentSerializer,
     )
-        @permission_required("rodManager.change_roddocument")
+    @permission_required("rodManager.change_roddocument")
     def put(self, request, document_id):
         document = UserDocument.objects.get(pk=document_id)
         serializer = UpdateUserDocumentSerializer(document, data=request.data)
