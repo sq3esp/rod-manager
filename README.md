@@ -58,3 +58,6 @@ python manage.py dumpdatautf8 --output data.json --exclude contenttypes --exclud
 ```shell
 docker compose exec web python manage.py loaddatautf8 data.json
 ```
+
+### KAFKA
+Kafka.
