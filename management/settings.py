@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("SECRET_KEY", default="secret_key")
 
-DEBUG = bool(os.environ.get("DEBUG", default=1))
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
@@ -82,7 +82,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "management.wsgi.application"
-
+use_debugger=False
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

@@ -1,4 +1,3 @@
-# pull official base image
 FROM python:3.11.4-slim-buster
 
 WORKDIR /certs_private
@@ -17,8 +16,10 @@ RUN chmod 444 certs/ca.cert.pem
 RUN openssl x509 -noout -text -in certs/ca.cert.pem
 RUN openssl genpkey -algorithm RSA -out private/server.key.pem
 RUN chmod 400 private/server.key.pem
-RUN openssl req -config /certs_private/openssl.cnf -key private/server.key.pem -new -out csr/server.csr.pem -subj "/C=PL/ST=Wielkopolska/O=RodManager/CN=rodmanager.pl" -extensions v3_ca
-RUN openssl x509 -req -sha256 -passin pass:foobar -days 375 -in csr/server.csr.pem -CA certs/ca.cert.pem -CAkey private/ca.key.pem -out certs/server.cert.pem -extfile /certs_private/openssl.cnf -CAcreateserial -extensions server_cert
+RUN openssl req -config /certs_private/openssl.cnf -key private/server.key.pem -new -out csr/server.csr.pem \
+    -subj "/C=PL/ST=Wielkopolska/O=RodManager/CN=rodmanager.pl" -extensions v3_ca
+RUN openssl x509 -req -sha256 -passin pass:foobar -days 375 -in csr/server.csr.pem -CA certs/ca.cert.pem -CAkey \
+    private/ca.key.pem -out certs/server.cert.pem -extfile /certs_private/openssl.cnf -CAcreateserial -extensions server_cert
 RUN mkdir /certs
 RUN cp private/server.key.pem /certs/server.key.pem
 RUN cp certs/server.cert.pem /certs/server.cert.pem
