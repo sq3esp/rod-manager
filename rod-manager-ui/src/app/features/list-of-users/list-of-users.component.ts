@@ -78,8 +78,11 @@ export class ListOfUsersComponent {
   }
 
   navigateToProfileComponent(id: string) {
-    this.router.navigate(['/user-info', id]);
+    // przekazuje uid zamiast id
+    this.router.navigate(['/user-info', (id)]);
   }
+
+
 
   mapAccountStatusesToTranslated(status: Role[] | undefined): string | undefined {
     if (!status) {

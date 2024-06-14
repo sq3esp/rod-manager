@@ -8,7 +8,7 @@ import {findGardenByUserID,} from "../list-of-garden-plot/GardenService";
 import {ListOfUsersService} from "../list-of-users/list-of-users.service";
 import {BackendGardenService} from "../list-of-garden-plot/backend-garden.service";
 import {StorageService} from "../../core/storage/storage.service";
-import {forkJoin} from "rxjs";
+import {forkJoin, of} from "rxjs";
 import {UserInfoService} from "./user-info.service";
 import {NgxSpinnerService} from "ngx-spinner";
 import {
@@ -30,7 +30,7 @@ import {DocumentsService} from "../documents/documents.service";
 })
 export class UserInfoComponent {
   // @ts-ignore
-  id: number;
+  uid: string;
   profile: Profile | undefined;
   userInfoForm: FormGroup;
   showUserEdit: boolean = true;
@@ -58,6 +58,10 @@ export class UserInfoComponent {
   showAddDocumentForm = false;
   showAddListForm = false;
   selectedFile: File | null = null;
+
+  isMyProfile: boolean = false;
+
+
 
 
   constructor(
@@ -97,43 +101,70 @@ export class UserInfoComponent {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.isAvailableToEdit = true
-      this.id = parseInt(params['id'], 10)
-      this.spinner.show()
-      this.loadData()
+      const idParam = params['id'];
+      this.isAvailableToEdit = true;
+
+      if (idParam) {
+        this.uid = idParam;
+        this.spinner.show();
+        this.loadData(idParam);
+      } else {
+        this.isMyProfile = true;
+        this.loadData("myAccount");
+      }
     });
   }
 
-  loadData() {
-    forkJoin({
-      gardenPlots: this.backendGardenService.getAllGardenPlots(),
-      profile: this.listOfUsersService.getProfileById(this.id),
-      myProfile: this.userInfoService.getMyProfile(),
-      documents: this.documentsService.getUserDocuments(this.id),
-    }).subscribe(
-      {
+  loadData(id: string) {
+    if (id === "myAccount") {
+      this.userInfoService.getMyProfile().subscribe({
         next: data => {
-          this.gardenPlots = data.gardenPlots;
-          this.profile = data.profile;
-          this.documents = data.documents;
-          this.myProfile = data.myProfile
-
-          const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots)
-          if(gardenPlot){
-            this.gardenPlotAdress = `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}`
-          }
-          else this.gardenPlotAdress = null
-          this.initData()
-          this.spinner.hide()
+          this.myProfile = data;
+          // @ts-ignore
+          this.uid = this.myProfile?.id;
+          this.fetchData("myAccount");
         },
         error: error => {
-          console.error(error);
-          this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
-          this.router.navigate(['/403']);
-          this.spinner.hide()
+          this.handleError(error);
         }
-      })
-    console.error();
+      });
+    } else {
+      this.fetchData(id);
+    }
+  }
+
+  fetchData(id: string) {
+    forkJoin({
+      gardenPlots: this.backendGardenService.getAllGardenPlots(),
+      profile: this.listOfUsersService.getProfileById(id),
+      documents: this.documentsService.getUserDocuments(id),
+      myProfile: id === "myAccount" ? this.userInfoService.getMyProfile() : of(null),
+    }).subscribe({
+      next: data => {
+        this.gardenPlots = data.gardenPlots;
+        this.profile = data.profile;
+        this.documents = data.documents;
+
+        if (data.myProfile) {
+          this.myProfile = data.myProfile;
+        }
+
+        const gardenPlot = findGardenByUserID(this.profile?.id, this.gardenPlots);
+        this.gardenPlotAdress = gardenPlot ? `${gardenPlot.sector}, ${gardenPlot.avenue}, ${gardenPlot.number}` : null;
+        this.initData();
+        this.spinner.hide();
+      },
+      error: error => {
+        this.handleError(error);
+      }
+    });
+  }
+
+  handleError(error: any) {
+    console.error(error);
+    this.toastr.error("Ups, coś poszło nie tak", 'Błąd');
+    this.router.navigate(['/403']);
+    this.spinner.hide();
   }
 
   initData() {
@@ -296,7 +327,16 @@ export class UserInfoComponent {
         groups: newStatus,
       };
 
-      this.listOfUsersService.editProfile(newUser, this.id).subscribe({
+      let tempId
+
+      if(this.isMyProfile){
+        tempId = "myAccount"
+      }
+      else {
+        tempId = this.uid.toString()
+      }
+
+      this.listOfUsersService.editProfile(newUser, tempId).subscribe({
         error: err => {
           console.error(err)
           this.toastr.error("Ups, Edycja profilu zakończona niepowodzeniem", 'Błąd');
@@ -366,9 +406,9 @@ export class UserInfoComponent {
       const newTitle: string = this.addFileForm.get('name')?.value;
       const newDocument: Leaf = {name: newTitle, file: this.selectedFile};
       this.spinner.show()
-      this.documentsService.postUserDocuments(newDocument, this.id).subscribe({
+      this.documentsService.postUserDocuments(newDocument, this.uid).subscribe({
         next: data => {
-          this.documentsService.getUserDocuments(this.id)
+          this.documentsService.getUserDocuments(this.isMyProfile ? "myAccount" : this.uid.toString())
             .subscribe((result: Document[]) => {
               this.documents = result
               this.showAddDocumentForm = false
@@ -388,9 +428,9 @@ export class UserInfoComponent {
       const newTitle: string = this.addListForm.get('name')?.value;
       const newLeaf: Leaf = {name: newTitle};
       this.spinner.show()
-      this.documentsService.postUserDocuments(newLeaf, this.id).subscribe((res) => {
+      this.documentsService.postUserDocuments(newLeaf, this.uid).subscribe((res) => {
         // this.updateDocumentsList()
-        this.documentsService.getUserDocuments(this.id)
+        this.documentsService.getUserDocuments(this.isMyProfile ? "myAccount" : this.uid.toString())
           .subscribe({
             next: result => {
               this.documents = result
@@ -409,11 +449,13 @@ export class UserInfoComponent {
   }
 
   onItemAdded() {
-    this.documentsService.getUserDocuments(this.id)
+    this.documentsService.getUserDocuments(this.isMyProfile ? "myAccount" : this.uid.toString())
       .subscribe((result: Document[]) => {
         this.documents = result
       });
   }
+
+  protected readonly Number = Number;
 }
 
 

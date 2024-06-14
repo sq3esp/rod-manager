@@ -85,6 +85,7 @@ class AccountView(APIView):
                 "phone": accounts.phone,
                 "groups": [group.name for group in accounts.groups.all()],
                 "balance": accounts.calculate_balance(),
+                "uid": accounts.uid,
             }
             for accounts in paginated_accounts
         ]

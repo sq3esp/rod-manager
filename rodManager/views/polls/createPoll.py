@@ -35,6 +35,9 @@ class AddVotingSerializer(serializers.Serializer):
     def create(self, validated_data):
         if validated_data["end_date"] < datetime.now(pytz.utc):
             raise serializers.ValidationError("Finish date must be in the future")
+        # Walidacja, ze dodaliśmy co najmniej 2 opcje
+        if len(validated_data["options"]) < 2:
+            raise serializers.ValidationError("The poll must contain at least two options.")
         poll = Poll.objects.create(
             title=validated_data["title"],
             description=validated_data["description"],

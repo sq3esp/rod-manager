@@ -2,7 +2,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, OpenApiResponse
 
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -64,17 +64,11 @@ class RODInfoApi(APIView):
         }
     )
     def post(self, request):
-        new_employee = request.data
-        if not new_employee["position"]:
-            return Response({"error": "Position is required"}, status=status.HTTP_400_BAD_REQUEST)
-        if not new_employee["name"]:
-            return Response({"error": "Name is required"}, status=status.HTTP_400_BAD_REQUEST)
-        if not new_employee["phoneNumber"]:
-            return Response({"error": "Phone number is required"}, status=status.HTTP_400_BAD_REQUEST)
-        if not new_employee["email"]:
-            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-        Employee.objects.create(**new_employee)
-        return Response(new_employee, status=status.HTTP_201_CREATED)
+        serializer = EmployeeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         summary="Edit employee",
@@ -95,24 +89,18 @@ class RODInfoApi(APIView):
         }
     )
 
-
     def put(self, request):
         employee_id = request.query_params.get("employee_id")
-
-        new_employee = request.data
         if not Employee.objects.filter(id=employee_id).exists():
-            return Response({"error": "employee not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+
         employee = Employee.objects.get(id=employee_id)
-        if new_employee["position"]:
-            employee.position = new_employee["position"]
-        if new_employee["name"]:
-            employee.name = new_employee["name"]
-        if new_employee["phoneNumber"]:
-            employee.phoneNumber = new_employee["phoneNumber"]
-        if new_employee["email"]:
-            employee.email = new_employee["email"]
-        employee.save()
-        return Response(new_employee, status=status.HTTP_200_OK)
+        serializer = EmployeeSerializer(employee, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, employee_id):
         if not Employee.objects.filter(id=employee_id).exists():

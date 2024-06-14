@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -48,7 +48,13 @@ class UserDocumentByIdView(APIView):
     )
     @permission_required("rodManager.change_roddocument")
     def put(self, request, document_id):
-        document = UserDocument.objects.get(pk=document_id)
+        try:
+            user_id = request.data.get("user")
+            document = UserDocument.objects.get(user=user_id)
+        except Account.DoesNotExist:
+            return Response({"error": "Invalid user."}, status=status.HTTP_400_BAD_REQUEST)
+        except UserDocument.DoesNotExist:
+            return Response({"error": f"User document does not exist."}, status=status.HTTP_404_NOT_FOUND)
         serializer = UpdateUserDocumentSerializer(document, data=request.data)
         serializer.is_valid(raise_exception=True)
         response = UserDocumentByIdSerializer(serializer.save()).data
@@ -61,7 +67,10 @@ class UserDocumentByIdView(APIView):
     )
     @permission_required("rodManager.delete_roddocument")
     def delete(self, request, document_id):
-        document = get_object_or_404(UserDocument, pk=document_id)
+        try:
+            document = UserDocument.objects.get(user=document_id)
+        except UserDocument.DoesNotExist:
+            return Response({"error": f"User document does not exist."}, status=status.HTTP_404_NOT_FOUND)
         if document.file:
             document.file.delete()
         document.delete()

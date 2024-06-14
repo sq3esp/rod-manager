@@ -15,6 +15,16 @@ class UserDocumentByUserIdView(APIView):
     )
     @permission_required("rodManager.view_userdocument")
     def get(self, request, user_id):
+        try:
+            if user_id != 'myAccount':
+                if user_id.isdigit():
+                    user_id = Account.objects.get(id=user_id)
+                else:
+                    user_id = Account.objects.get(uid=user_id)
+            else:
+                user_id = request.user.id
+        except Account.DoesNotExist:
+            return Response({"error": "Invalid user."}, status=status.HTTP_400_BAD_REQUEST)
         root_documents = UserDocument.objects.filter(parent__isnull=True, user=user_id)
         data = [doc.to_dict() for doc in root_documents]
         return Response(data)
