@@ -16,7 +16,7 @@ def gen_uuid(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rodManager', '0034_account_uid'),
+        ('rodManager', '0035_account_uid'),
     ]
 
     operations = [

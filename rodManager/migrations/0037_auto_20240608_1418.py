@@ -7,7 +7,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rodManager', '0035_add_unique_account_uid'),
+        ('rodManager', '0036_add_unique_account_uid'),
     ]
 
     operations = [

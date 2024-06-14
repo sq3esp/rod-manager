@@ -7,7 +7,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('rodManager', '0033_rename_confimation_date_billingperiod_confirmation_date'),
+        ('rodManager', '0034_twosteplogin'),
     ]
 
     operations = [
