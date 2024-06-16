@@ -1,30 +1,8 @@
 # rod-manager
-### SETUP 
-## Setup venv and install requirements:
-(Windows)
-```
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### LAUNCH
-```
-venv\Scripts\activate
-python manage.py runserver
-```
-
-## Setup with docker compose
+## SETUP 
 ### Requirements
 - Install docker desktop: https://www.docker.com/products/docker-desktop
 - Have docker deamon running
-
-### Launch full app
-In the root folder of the project, run:
-```shell
-git submodule update --init --recursive
-docker-compose up -d --build 
-```
 
 ### Launch
 In the root folder of the project, run:
@@ -32,32 +10,21 @@ In the root folder of the project, run:
 docker-compose up -d --build 
 ```
 
-### Rebuild
+### Generate new certificates
+In the root folder of the project, run:
 ```shell
-docker-compose down
 docker-compose up -d --build 
 ```
 
-### Production (almost) version with nginx
-
-```shell
-docker-compose -f docker-compose.prod.yml up -d --build  
-```
-
-### Rebuild production version
-```shell
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml up -d --build  
-```
-
-### EXPORT DATABASE TO FILE
-```shell
-python manage.py dumpdatautf8 --output data.json --exclude contenttypes --exclude auth.permission
-```
-### LOAD DATABASE FROM FILE
-```shell
-docker compose exec web python manage.py loaddatautf8 data.json
-```
-
 ### KAFKA
-Kafka.
+Requirements:
+- Install kafka: https://kafka.apache.org/quickstart
+- Install zookeeper: https://zookeeper.apache.org/doc/r3.6.3/zookeeperStarted.html
+
+```shell
+sudo /opt/kafka_2.13-3.6.0/bin/zookeeper-server-start.sh /opt/kafka_2.13-3.6.0/config/zookeeper.properties
+sudo /opt/kafka_2.13-3.6.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.6.0/config/server.properties
+/opt/kafka_2.13-3.6.0/bin/kafka-topics.sh --create --topic water-meters --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+python -m rodManager.kafka.kafka_consumer
+python -m water_meters.meter_raport
+```
